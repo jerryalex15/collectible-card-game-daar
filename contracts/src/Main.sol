@@ -44,11 +44,23 @@ contract Main is Ownable { // Inheriting from Ownable
         collectionCounter++;
     }
 
-    function mintCardToUser(uint256 collectionId,address to,string memory img) external onlyOwner {
+    event DebugEvent(string message);
+
+    function mintCardToUser(uint256 collectionId, address to, string memory img, uint256 quantity) external {
+        emit DebugEvent("Entered mintCardToUser");
+
         require(collectionId < collectionCounter, "Collection does not exist");
+        require(quantity > 0, "Quantity must be greater than 0");
+
         Collection collection = Collection(collections[collectionId].collectionAddress);
-        uint256 cardId = collection.mintTo(to, img);
-        emit CardMinted(collectionId, cardId, to);
+
+        // Emit before minting cards
+        emit DebugEvent("About to mint multiple cards for user");
+
+        for (uint256 i = 0; i < quantity; i++) {
+            uint256 cardId = collection.mintTo(to, img);
+            emit CardMinted(collectionId, cardId, to);
+        }
     }
 
     function getCollectionInfo(uint256 collectionId) external view returns (string memory, address, uint256) {
@@ -63,5 +75,67 @@ contract Main is Ownable { // Inheriting from Ownable
             allCollections[i] = collections[i];
         }
         return allCollections;
+    }
+
+    // Returns all token IDs owned by a specific address in a specific collection
+    function getCardsOwnedByUser(uint256 collectionId, address user) external view returns (uint256[] memory) {
+        require(collectionId < collectionCounter, "Collection does not exist");
+        Collection collection = Collection(collections[collectionId].collectionAddress);
+        
+        uint256 userBalance = collection.balanceOf(user);
+        uint256[] memory ownedTokens = new uint256[](userBalance);
+        
+        uint256 count = 0;
+        for (uint256 i = 0; i < collection.cardCount(); i++) {
+            try collection.ownerOf(i) returns (address owner) {
+                if (owner == user) {
+                    ownedTokens[count] = i;
+                    count++;
+                }
+            } catch {}
+        }
+
+        return ownedTokens;
+    }
+
+    // New function to retrieve all cards owned by user across all collections
+    function getAllCardsOwnedByUser(address user) external view returns (uint256[] memory, uint256[] memory) {
+        uint256 totalCardsCount = 0;
+
+        // First, count all cards owned by the user across all collections
+        for (uint256 i = 0; i < collectionCounter; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+            for (uint256 j = 0; j < collections[i].cardCount; j++) {
+                try collection.ownerOf(j) returns (address owner) {
+                    if (owner == user) {
+                        totalCardsCount++;
+                    }
+                } catch {
+                    // Ignore errors, as they indicate non-existing cards
+                }
+            }
+        }
+
+        uint256[] memory collectionIds = new uint256[](totalCardsCount);
+        uint256[] memory cardIds = new uint256[](totalCardsCount);
+        uint256 index = 0;
+
+        // Second, store each card's collection ID and card ID owned by the user
+        for (uint256 i = 0; i < collectionCounter; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+            for (uint256 j = 0; j < collections[i].cardCount; j++) {
+                try collection.ownerOf(j) returns (address owner) {
+                    if (owner == user) {
+                        collectionIds[index] = i;
+                        cardIds[index] = j;
+                        index++;
+                    }
+                } catch {
+                    // Ignore errors, as they indicate non-existing cards
+                }
+            }
+        }
+
+        return (collectionIds, cardIds);
     }
 }

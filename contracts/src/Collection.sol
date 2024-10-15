@@ -32,15 +32,15 @@ contract Collection is ERC721URIStorage {
         _;
     }
 
-    function mintTo(address to, string memory img) external onlyOwner returns (uint256) {
+    function mintTo(address to, string memory img) external returns (uint256) {
         require(_tokenIdCounter < cardCount, "Max card count reached");
-        
+
         uint256 newCardId = _tokenIdCounter;
-        _tokenIdCounter += 1;  // Incrémentation manuelle du compteur
+        _tokenIdCounter += 1;
 
         _mint(to, newCardId);
-
         cards[newCardId] = Card({cardNumber: newCardId, img: img});
+
         return newCardId;
     }
 
