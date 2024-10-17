@@ -1,2 +1,2 @@
-import global_styles from '../styles/styles.module.css'
-import navbar_styles from '../styles/pages/MarketplacePage.css'
+import global_styles '@/styles/styles.module.css'
+import navbar_styles '@/styles/pages/MarketplacePage.css'

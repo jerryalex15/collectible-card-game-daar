@@ -1,17 +1,12 @@
-import global_styles from '../../styles/styles.module.css'
-import navbar_styles from '../../styles/components/layout/NavBar.css'
+import global_styles from '@/styles/styles.module.css'
+import navbar_styles from '@/styles/components/layout/NavBar.css'
+import { useWallet } from '@/context/AuthContext';
 
-interface NavBarProps {
-    route: {
-        params: {
-            wallet: any;
-        };
-    };
-}
-
-const NavBar : React.FC<NavBarProps> = ({ route }) => {
+const NavBar = () => {
+    
     return (
         <nav>
+            <h2>Adresse : { useWallet()?.details?.account }</h2>
             <ul>
                 <li><a href="#accueil">Accueil</a></li>
                 <li><a href="#collection">Ma Collection</a></li>

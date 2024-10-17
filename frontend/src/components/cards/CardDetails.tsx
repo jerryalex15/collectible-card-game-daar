@@ -1,2 +1,2 @@
-import global_styles from '../../styles/styles.module.css'
-import navbar_styles from '../../styles/components/cards/CardDetails.css'
+import global_styles from '@/styles/styles.module.css'
+import navbar_styles from '@/styles/components/cards/CardDetails.css'
