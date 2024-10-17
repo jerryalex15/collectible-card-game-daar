@@ -52,7 +52,7 @@ contract Collection is ERC721URIStorage {
         _mint(to, newCardId);
         cards[newCardId] = Card({
             id: newCardId,
-            realID: realID, 
+            realID: realID,
             name: cardName,
             img: cardImage,
             rarity: rarity,
@@ -68,6 +68,19 @@ contract Collection is ERC721URIStorage {
         return (card.id, card.realID, card.name, card.img, card.rarity, card.redeem);
     }
 
-    // fonction pour changer la valeru de bool redeem 
+    // fonction pour changer la valeur de bool redeem
+    function setRedeemStatus(uint256 cardId, bool newRedeemStatus, address userAddress) external {
+        // require(ownerOf(cardId) == msg.sender, "Only the owner can change redeem status");
+        require(ownerOf(cardId) == userAddress, "Only the owner can change redeem status");
+        cards[cardId].redeem = newRedeemStatus;
+    }
+
     // fonction pour echanger de carte; prend cardId, userTo, userFrom
+    function transferCard(uint256 cardId, address userFrom, address userTo) external {
+        require(ownerOf(cardId) == userFrom, "UserFrom is not the owner of the card");
+        require(msg.sender == userFrom || msg.sender == owner, "Only the card owner or contract owner can initiate a transfer");
+
+        _transfer(userFrom, userTo, cardId);
+        setRedeemStatus(cardId, false, userFrom);
+    }
 }

@@ -61,6 +61,25 @@ const mainContractABI = [
     "stateMutability": "view",
     "type": "function"
   },
+  {
+    "constant": true,
+    "inputs": [
+      { "name": "collectionId", "type": "uint256" },
+      { "name": "cardId", "type": "uint256" }
+    ],
+    "name": "getCardMetadata",
+    "outputs": [
+      { "name": "id", "type": "uint256" },
+      { "name": "realID", "type": "string" },
+      { "name": "name", "type": "string" },
+      { "name": "img", "type": "string" },
+      { "name": "rarity", "type": "string" },
+      { "name": "redeem", "type": "bool" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  }
 ];
 
 const collectionABI = [
@@ -92,7 +111,32 @@ const collectionABI = [
     ],
     "stateMutability": "view",
     "type": "function"
-  }
+  },
+    // Fonction pour mettre à jour le statut redeem d'une carte
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "cardId", "type": "uint256" },
+        { "internalType": "bool", "name": "redeemStatus", "type": "bool" },
+        { "internalType": "address", "name": "userAddress", "type": "address" }
+      ],
+      "name": "setRedeemStatus",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+  
+    // Fonction pour transférer une carte d'un utilisateur à un autre
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "cardId", "type": "uint256" },
+        { "internalType": "address", "name": "userFrom", "type": "address" },
+        { "internalType": "address", "name": "userTo", "type": "address" }
+      ],
+      "name": "transferCard",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
   // Add other functions as needed
 ];
 
@@ -109,22 +153,6 @@ const wallet = new ethers.Wallet(privateKey, provider);
 const mainContract = new ethers.Contract(mainContractAddress, mainContractABI, wallet);
 
 import axios from 'axios';
-
-// app.get('/test', async (req, res) => {
-//   // pokemon.card.all()
-//   // .then((cards) => {
-//   //     console.log(cards) // "Blastoise"
-//   //     res.status(200).json(cards);
-//   // })
-
-//   pokemon.card.where({ q: 'set: id : base1 }' })
-//   .then(result => {
-//       console.log(result.data); // "Blastoise"
-//       res.status(200).json(result.data);
-//   })
-
-
-// });
 
 // Route pour obtenir les informations d'une carte Pokémon depuis l'API Pokémon TCG
 app.get('/pokemon-card/:name', async (req, res) => {
@@ -232,33 +260,72 @@ app.get('/collection/:id', async (req, res) => {
   }
 });
 
-// API Endpoint to get all cards owned by a user in a collection
+// API Endpoint to get all cards owned by a user in a specific collection with metadata
 app.get('/api/collection/:collectionId/user/:userAddress/cards', async (req, res) => {
   const { collectionId, userAddress } = req.params;
 
   try {
-    // Call the smart contract function
-    const ownedCards = await mainContract.getCardsOwnedByUser(collectionId, userAddress);
+    // Retrieve all collection and card IDs owned by the user across all collections
+    const [allCollectionIds, allCardIds] = await mainContract.getAllCardsOwnedByUser(userAddress);
+
+    // Filter to only include cards from the specified collectionId
+    const filteredCardIds = allCardIds.filter((_, index) => allCollectionIds[index] == collectionId);
+
+    if (filteredCardIds.length === 0) {
+      return res.status(200).json({ collectionId, userAddress, ownedCards: [] });
+    }
+
+    // Retrieve the collection address from the Main contract
+    const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
+    const collectionContract = new ethers.Contract(collectionAddress, collectionABI, provider);
+
+    // Retrieve metadata for each filtered card owned by the user
+    const ownedCards = await Promise.all(filteredCardIds.map(async (cardId) => {
+      const card = await collectionContract.getCard(cardId);
+
+      // Construct and return card metadata
+      return {
+        cardId: card[0].toNumber(),
+        realID: card[1],
+        name: card[2],
+        image: card[3], // Assuming img is a URL or base64 data
+        rarity: card[4],
+        redeem: card[5]
+      };
+    }));
 
     res.status(200).json({ collectionId, userAddress, ownedCards });
   } catch (error) {
-    console.error('Error fetching user cards:', error);
+    console.error('Error fetching user cards with metadata:', error);
     res.status(500).json({ error: 'Error fetching user cards', details: error.message });
   }
 });
 
-// Endpoint to get all cards owned by a user
+// Endpoint to get all cards owned by a user with metadata
 app.get('/user/:userAddress/cards', async (req, res) => {
   const userAddress = req.params.userAddress;
 
   try {
-      // Call the getAllCardsOwnedByUser function
+      // Appel à la fonction qui retourne tous les collectionIds et cardIds pour l'utilisateur
       const [collectionIds, cardIds] = await mainContract.getAllCardsOwnedByUser(userAddress);
 
-      // Format the result to return as JSON
-      const ownedCards = collectionIds.map((collectionId, index) => ({
-          collectionId: collectionId.toNumber(),
-          cardId: cardIds[index].toNumber()
+      // Récupère toutes les métadonnées en une seule fois
+      const ownedCards = await Promise.all(collectionIds.map(async (collectionId, index) => {
+          const cardId = cardIds[index].toNumber();
+
+          // Appel direct à `getCardMetadata` dans `mainContract`
+          const cardMetadata = await mainContract.getCardMetadata(collectionId.toNumber(), cardId);
+
+          // Formatage des métadonnées de la carte
+          return {
+              collectionId: collectionId.toNumber(),
+              cardId,
+              realID: cardMetadata[1],
+              name: cardMetadata[2],
+              img: cardMetadata[3],
+              rarity: cardMetadata[4],
+              redeem: cardMetadata[5]
+          };
       }));
 
       res.status(200).json({ ownedCards });
@@ -278,21 +345,66 @@ app.get('/collection/:collectionId/nft/:tokenId', async (req, res) => {
     const collectionContract = new ethers.Contract(collectionAddress, collectionABI, provider);
 
     // Get card details from the Collection contract
-    const [cardNumber, img] = await collectionContract.getCard(tokenId);
+    const card = await collectionContract.getCard(tokenId);
 
-    // Construct metadata
+    // Construct metadata based on all the card attributes
     const metadata = {
-      cardId: cardNumber,
-      image: img, // Assuming img is a URL or base64 data
-      // Add other metadata attributes as needed, e.g., name, description
+      cardId: card[0].toNumber(), // id
+      realID: card[1],            // realID
+      name: card[2],              // name
+      image: card[3],             // img
+      rarity: card[4],            // rarity
+      redeem: card[5]             // redeem
     };
 
     res.status(200).json(metadata);
   } catch (error) {
+    console.error('Error retrieving metadata:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
+// API Endpoint to update the redeem status of a card
+app.put('/collection/:collectionId/card/:cardId/redeem', async (req, res) => {
+  const { collectionId, cardId } = req.params;
+  const { userAddress, newStatus } = req.body;
+  
+  const signer = provider.getSigner();
+  console.log(signer);
+  
+  const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
+  const collectionContract = new ethers.Contract(collectionAddress, collectionABI, signer);
+  try {
+    const tx = await collectionContract.setRedeemStatus(cardId, newStatus, userAddress);
+    await tx.wait();
+
+    res.status(200).json({ message: 'Redeem status updated successfully', tx: tx });
+  } catch (error) {
+    console.error('Error updating redeem status:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API Endpoint to transfer a card from one user to another
+app.post('/collection/:collectionId/card/:cardId/transfer', async (req, res) => {
+  const { collectionId, cardId } = req.params;
+  const { userFrom, userTo } = req.body;
+  const signer = provider.getSigner();
+  console.log(signer);
+
+  try {
+    const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
+    const collectionContract = new ethers.Contract(collectionAddress, collectionABI, signer);
+
+    const tx = await collectionContract.transferCard(cardId, userFrom, userTo);
+    await tx.wait();
+
+    res.status(200).json({ message: 'Card transferred successfully', tx: tx });
+  } catch (error) {
+    console.error('Error transferring card:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Lancer le serveur
 const PORT = 3000;
