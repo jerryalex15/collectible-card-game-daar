@@ -46,7 +46,7 @@ contract Main is Ownable { // Inheriting from Ownable
 
     event DebugEvent(string message);
 
-    function mintCardToUser(uint256 collectionId, address to, string memory img, uint256 quantity) external {
+    function mintCardToUser(uint256 collectionId, address to, string memory realID, string memory cardName, string memory cardImage, string memory rarity, bool redeem, uint256 quantity) external {
         emit DebugEvent("Entered mintCardToUser");
 
         require(collectionId < collectionCounter, "Collection does not exist");
@@ -58,7 +58,7 @@ contract Main is Ownable { // Inheriting from Ownable
         emit DebugEvent("About to mint multiple cards for user");
 
         for (uint256 i = 0; i < quantity; i++) {
-            uint256 cardId = collection.mintTo(to, img);
+            uint256 cardId = collection.mintTo(to, realID, cardName, cardImage, rarity, redeem);
             emit CardMinted(collectionId, cardId, to);
         }
     }

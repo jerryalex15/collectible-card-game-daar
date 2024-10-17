@@ -10,8 +10,12 @@ contract Collection is ERC721URIStorage {
     address public owner;
 
     struct Card {
-        uint256 cardNumber;
+        uint256 id;
+        string realID; // Nouveau champ ajouté
+        string name;
         string img;
+        string rarity;
+        bool redeem;
     }
 
     mapping(uint256 => Card) public cards;
@@ -32,21 +36,38 @@ contract Collection is ERC721URIStorage {
         _;
     }
 
-    function mintTo(address to, string memory img) external returns (uint256) {
+    function mintTo(
+        address to,
+        string memory realID, 
+        string memory cardName,
+        string memory cardImage,
+        string memory rarity,
+        bool redeem
+    ) external returns (uint256) {
         require(_tokenIdCounter < cardCount, "Max card count reached");
 
         uint256 newCardId = _tokenIdCounter;
         _tokenIdCounter += 1;
 
         _mint(to, newCardId);
-        cards[newCardId] = Card({cardNumber: newCardId, img: img});
+        cards[newCardId] = Card({
+            id: newCardId,
+            realID: realID, 
+            name: cardName,
+            img: cardImage,
+            rarity: rarity,
+            redeem: redeem
+        });
 
         return newCardId;
     }
 
-    function getCard(uint256 cardId) external view returns (uint256, string memory) {
+    function getCard(uint256 cardId) external view returns (uint256, string memory, string memory, string memory, string memory, bool) {
         require(ownerOf(cardId) != address(0), "Card does not exist");
         Card memory card = cards[cardId];
-        return (card.cardNumber, card.img);
+        return (card.id, card.realID, card.name, card.img, card.rarity, card.redeem);
     }
+
+    // fonction pour changer la valeru de bool redeem 
+    // fonction pour echanger de carte; prend cardId, userTo, userFrom
 }
