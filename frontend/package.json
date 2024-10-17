@@ -9,8 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/native-stack": "^6.11.0",
+    "frontend": "file:",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-native": "^0.75.4",
+    "react-native-web": "^0.19.12",
+    "react-scripts": "^5.0.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.17",
