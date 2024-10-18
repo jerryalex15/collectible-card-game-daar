@@ -18,15 +18,13 @@ const mainContractABI = [
   {
     "inputs": [
       { "internalType": "uint256", "name": "collectionId", "type": "uint256" },
-      { "internalType": "address", "name": "to", "type": "address" },
       { "internalType": "string", "name": "realID", "type": "string" },
       { "internalType": "string", "name": "cardName", "type": "string" },
       { "internalType": "string", "name": "cardImage", "type": "string" },
       { "internalType": "string", "name": "rarity", "type": "string" },
-      { "internalType": "bool", "name": "redeem", "type": "bool" },
-      { "internalType": "uint256", "name": "quantity", "type": "uint256" }
+      { "internalType": "bool", "name": "exchange", "type": "bool" },
     ],
-    "name": "mintCardToUser",
+    "name": "mintCard",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -74,26 +72,7 @@ const mainContractABI = [
       { "name": "name", "type": "string" },
       { "name": "img", "type": "string" },
       { "name": "rarity", "type": "string" },
-      { "name": "redeem", "type": "bool" }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      { "name": "collectionId", "type": "uint256" },
-      { "name": "cardId", "type": "uint256" }
-    ],
-    "name": "getCardMetadata",
-    "outputs": [
-      { "name": "id", "type": "uint256" },
-      { "name": "realID", "type": "string" },
-      { "name": "name", "type": "string" },
-      { "name": "img", "type": "string" },
-      { "name": "rarity", "type": "string" },
-      { "name": "redeem", "type": "bool" }
+      { "name": "exchange", "type": "bool" }
     ],
     "payable": false,
     "stateMutability": "view",
@@ -102,11 +81,16 @@ const mainContractABI = [
 ];
 
 const collectionABI = [
-  // Add ABI entries for the functions in the Collection contract
+  // Fonction pour minter une carte dans une collection spécifique
   {
     "inputs": [
       { "internalType": "address", "name": "to", "type": "address" },
-      { "internalType": "string", "name": "img", "type": "string" }
+      { "internalType": "uint256", "name": "collectionId", "type": "uint256" },
+      { "internalType": "string", "name": "realID", "type": "string" },
+      { "internalType": "string", "name": "cardName", "type": "string" },
+      { "internalType": "string", "name": "cardImage", "type": "string" },
+      { "internalType": "string", "name": "rarity", "type": "string" },
+      { "internalType": "bool", "name": "exchange", "type": "bool" }
     ],
     "name": "mintTo",
     "outputs": [
@@ -115,48 +99,47 @@ const collectionABI = [
     "stateMutability": "nonpayable",
     "type": "function"
   },
+  // Fonction pour récupérer les détails d'une carte spécifique
   {
     "inputs": [
       { "internalType": "uint256", "name": "cardId", "type": "uint256" }
     ],
     "name": "getCard",
     "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" },
-      { "internalType": "string", "name": "", "type": "string" },
-      { "internalType": "string", "name": "", "type": "string" },
-      { "internalType": "string", "name": "", "type": "string" },
-      { "internalType": "string", "name": "", "type": "string" },
-      { "internalType": "bool", "name": "", "type": "bool" },
+      { "internalType": "uint256", "name": "", "type": "uint256" },  // collectionId
+      { "internalType": "uint256", "name": "", "type": "uint256" },  // cardId
+      { "internalType": "string", "name": "", "type": "string" },    // realID
+      { "internalType": "string", "name": "", "type": "string" },    // cardName
+      { "internalType": "string", "name": "", "type": "string" },    // cardImage
+      { "internalType": "string", "name": "", "type": "string" },    // rarity
+      { "internalType": "bool", "name": "", "type": "bool" }         // exchange
     ],
     "stateMutability": "view",
     "type": "function"
   },
-    // Fonction pour mettre à jour le statut redeem d'une carte
-    {
-      "inputs": [
-        { "internalType": "uint256", "name": "cardId", "type": "uint256" },
-        { "internalType": "bool", "name": "redeemStatus", "type": "bool" },
-        { "internalType": "address", "name": "userAddress", "type": "address" }
-      ],
-      "name": "setRedeemStatus",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-  
-    // Fonction pour transférer une carte d'un utilisateur à un autre
-    {
-      "inputs": [
-        { "internalType": "uint256", "name": "cardId", "type": "uint256" },
-        { "internalType": "address", "name": "userFrom", "type": "address" },
-        { "internalType": "address", "name": "userTo", "type": "address" }
-      ],
-      "name": "transferCard",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  // Add other functions as needed
+  // Fonction pour mettre à jour le statut exchange d'une carte
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "cardId", "type": "uint256" },
+      { "internalType": "bool", "name": "newExchangeStatus", "type": "bool" },
+      { "internalType": "address", "name": "userAddress", "type": "address" }
+    ],
+    "name": "setExchangeStatus",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  // Fonction pour transférer une carte d'un utilisateur à un autre
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "cardId", "type": "uint256" },
+      { "internalType": "address", "name": "userTo", "type": "address" }
+    ],
+    "name": "assignCard",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
 ];
 
 const rpcUrl = process.env.RPC_URL;
@@ -173,26 +156,26 @@ const mainContract = new ethers.Contract(mainContractAddress, mainContractABI, w
 
 import axios from 'axios';
 
-// Route pour obtenir les informations d'une carte Pokémon depuis l'API Pokémon TCG
-app.get('/pokemon-card/:name', async (req, res) => {
-  const cardName = req.params.name;
-  try {
-    // Appeler l'API Pokémon TCG pour obtenir les détails de la carte
-    const response = await axios.get(`https://api.pokemontcg.io/v2/cards?q=name:${cardName}`);
-    const cardData = response.data.data;
+// // Route pour obtenir les informations d'une carte Pokémon depuis l'API Pokémon TCG
+// app.get('/pokemon-card/:name', async (req, res) => {
+//   const cardName = req.params.name;
+//   try {
+//     // Appeler l'API Pokémon TCG pour obtenir les détails de la carte
+//     const response = await axios.get(`https://api.pokemontcg.io/v2/cards?q=name:${cardName}`);
+//     const cardData = response.data.data;
 
-    if (cardData.length === 0) {
-      return res.status(404).json({ error: 'Card not found in Pokémon TCG API' });
-    }
+//     if (cardData.length === 0) {
+//       return res.status(404).json({ error: 'Card not found in Pokémon TCG API' });
+//     }
 
-    // Retourner toutes les informations de la carte trouvée
-    console.log(`Nombre de carte dans la colletion : ${cardData.length}`);
-    res.status(200).json(cardData);
-  } catch (error) {
-    console.error('Error fetching card data:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+//     // Retourner toutes les informations de la carte trouvée
+//     console.log(`Nombre de carte dans la colletion : ${cardData.length}`);
+//     res.status(200).json(cardData);
+//   } catch (error) {
+//     console.error('Error fetching card data:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 // Route pour créer une collection
 app.post('/create-collection', async (req, res) => {
@@ -226,7 +209,7 @@ app.post('/create-collection', async (req, res) => {
 
 // Route pour mint une carte NFT à un utilisateur (on va dire au hasard)
 app.post('/mint-card', async (req, res) => {
-  const { collectionId, userAddress, quantity} = req.body; // Récupérer les informations de la requête
+  const { collectionId } = req.body; // Récupérer les informations de la requête
   try {
 
     const collection= await mainContract.getCollectionInfo(collectionId);
@@ -235,14 +218,35 @@ app.post('/mint-card', async (req, res) => {
     const response = await axios.get(`https://api.pokemontcg.io/v2/cards?q=set.name:${collectionName}`);
     const cards = response.data.data;
 
-    const randomValue = getRandomIntInclusive(0, cards.length-1);
-    const card = cards[randomValue];
-    
-    const tx = await mainContract.mintCardToUser(collectionId, userAddress, card.id, card.name, card.images.small, card.rarity, false, quantity);
-    await tx.wait(); // Attendre que la transaction soit confirmée
-    res.status(200).json({ message: 'Card minted successfully', transactionHash: tx.hash });
+    for (let i=0; i < cards.length; i++){
+      const tx = await mainContract.mintCard(collectionId, cards[i].id, cards[i].name, cards[i].images.small, cards[i].rarity, false);
+      await tx.wait(); // Attendre que la transaction soit confirmée
+    }
+
+    res.status(200).json({ message: 'Card minted successfully' });
   } catch (error) {
     console.error(error); // Log pour mieux voir l'erreur
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API Endpoint to assign a card from one user to another
+app.post('/collection/:collectionId/card/:cardId/assign', async (req, res) => {
+  const { collectionId, cardId } = req.params;
+  const { userTo } = req.body;
+  const signer = provider.getSigner();
+  console.log(signer);
+
+  try {
+    const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
+    const collectionContract = new ethers.Contract(collectionAddress, collectionABI, signer);
+
+    const tx = await collectionContract.assignCard(cardId, userTo);
+    await tx.wait();
+
+    res.status(200).json({ message: 'Card assigned successfully', tx: tx });
+  } catch (error) {
+    console.error('Error assigning card:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -290,10 +294,6 @@ app.get('/api/collection/:collectionId/user/:userAddress/cards', async (req, res
     // Filter to only include cards from the specified collectionId
     const filteredCardIds = allCardIds.filter((_, index) => allCollectionIds[index] == collectionId);
 
-    if (filteredCardIds.length === 0) {
-      return res.status(200).json({ collectionId, userAddress, ownedCards: [] });
-    }
-
     // Retrieve the collection address from the Main contract
     const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
     const collectionContract = new ethers.Contract(collectionAddress, collectionABI, provider);
@@ -309,7 +309,7 @@ app.get('/api/collection/:collectionId/user/:userAddress/cards', async (req, res
         name: card[2],
         image: card[3], // Assuming img is a URL or base64 data
         rarity: card[4],
-        redeem: card[5]
+        exchange: card[5]
       };
     }));
 
@@ -337,13 +337,12 @@ app.get('/user/:userAddress/cards', async (req, res) => {
 
           // Formatage des métadonnées de la carte
           return {
-              collectionId: collectionId.toNumber(),
-              cardId,
+              cardId: cardMetadata[0].toNumber(),
               realID: cardMetadata[1],
               name: cardMetadata[2],
               img: cardMetadata[3],
               rarity: cardMetadata[4],
-              redeem: cardMetadata[5]
+              exchange: cardMetadata[5]
           };
       }));
 
@@ -359,21 +358,16 @@ app.get('/collection/:collectionId/nft/:tokenId', async (req, res) => {
   const { collectionId, tokenId } = req.params;
 
   try {
-    // Retrieve collection address from Main contract
-    const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
-    const collectionContract = new ethers.Contract(collectionAddress, collectionABI, provider);
-
-    // Get card details from the Collection contract
-    const card = await collectionContract.getCard(tokenId);
+    const card = await mainContract.getCardMetadata(collectionId, tokenId);
 
     // Construct metadata based on all the card attributes
     const metadata = {
-      cardId: card[0].toNumber(), // id
-      realID: card[1],            // realID
-      name: card[2],              // name
-      image: card[3],             // img
-      rarity: card[4],            // rarity
-      redeem: card[5]             // redeem
+      cardId: card[0].toNumber(),
+      realID: card[1],
+      name: card[2],
+      image: card[3], // Assuming img is a URL or base64 data
+      rarity: card[4],
+      exchange: card[5]            // exchange
     };
 
     res.status(200).json(metadata);
@@ -383,8 +377,8 @@ app.get('/collection/:collectionId/nft/:tokenId', async (req, res) => {
   }
 });
 
-// API Endpoint to update the redeem status of a card
-app.put('/collection/:collectionId/card/:cardId/redeem', async (req, res) => {
+// API Endpoint to update the exchange status of a card
+app.put('/collection/:collectionId/card/:cardId/exchange', async (req, res) => {
   const { collectionId, cardId } = req.params;
   const { userAddress, newStatus } = req.body;
   
@@ -394,35 +388,61 @@ app.put('/collection/:collectionId/card/:cardId/redeem', async (req, res) => {
   const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
   const collectionContract = new ethers.Contract(collectionAddress, collectionABI, signer);
   try {
-    const tx = await collectionContract.setRedeemStatus(cardId, newStatus, userAddress);
+    const tx = await collectionContract.setExchangeStatus(cardId, newStatus, userAddress);
     await tx.wait();
 
-    res.status(200).json({ message: 'Redeem status updated successfully', tx: tx });
+    res.status(200).json({ message: 'exchange status updated successfully', tx: tx });
   } catch (error) {
-    console.error('Error updating redeem status:', error);
-    console.error('Error updating redeem status:', error);
+    console.error('Error updating exchange status:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// API Endpoint to transfer a card from one user to another
-app.post('/collection/:collectionId/card/:cardId/transfer', async (req, res) => {
-  const { collectionId, cardId } = req.params;
-  const { userFrom, userTo } = req.body;
-  const signer = provider.getSigner();
-  console.log(signer);
+
+// Creation de booter
+app.post('/api/create-booster', async (req, res) => {
+  const { userAddress, numberOfCards } = req.body;
 
   try {
-    const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
-    const collectionContract = new ethers.Contract(collectionAddress, collectionABI, signer);
+    // Liste pour stocker les cartes du booster
+    let cardsInBooster = [];
 
-    const tx = await collectionContract.transferCard(cardId, userFrom, userTo);
-    await tx.wait();
+    // Étape 1 : Obtenir le nombre de collections
+    const collectionCounter = await mainContract.getCollectionCount(); // Assurez-vous que cette fonction existe
 
-    res.status(200).json({ message: 'Card transferred successfully', tx: tx });
+    for (let i = 0; i < numberOfCards; i++) {
+      const randomCollectionId = getRandomIntInclusive(0, collectionCounter - 1); // Choisir une collection aléatoire
+      const collectionInfo = await mainContract.getCollectionInfo(randomCollectionId); // Assurez-vous que cette fonction fonctionne
+      const collectionId = collectionInfo[0]; // Récupérer l'ID de la collection
+
+      // Récupérer les cartes via l'API Pokémon pour la collection
+      const response = await axios.get(`https://api.pokemontcg.io/v2/cards?q=set.id:${collectionId}`); // Utiliser l'ID de la collection
+      const cards = response.data.data;
+
+      // Sélectionner une carte aléatoire
+      const randomCardIndex = getRandomIntInclusive(0, cards.length - 1);
+      const card = cards[randomCardIndex];
+
+      // Ajouter la carte sélectionnée au booster
+      cardsInBooster.push({
+        id: i,           // ID temporaire pour la carte, à remplacer lors de la création
+        collectionId: collectionId,// Ajout de l'ID de la collection à laquelle la carte appartient
+        realID: card.id, // ID réel de la carte
+        name: card.name,
+        img: card.images.small,
+        rarity: card.rarity,
+        exchange: false, // État initial de l'échange
+      });
+    }
+
+    // Étape 2 : Appeler la fonction de création de booster dans le contrat
+    const boosterId = await mainContract.createBooster(cardsInBooster); // Appelez cette fonction sur le contrat
+
+    res.status(200).json({ "message":"Created" });
+    
   } catch (error) {
-    console.error('Error transferring card:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error creating booster:', error);
+    res.status(500).json({ error: 'Error creating booster', details: error.message });
   }
 });
 

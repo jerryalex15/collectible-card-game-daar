@@ -10,12 +10,12 @@ contract Collection is ERC721URIStorage {
     address public owner;
 
     struct Card {
-        uint256 id;
-        string realID; // Nouveau champ ajouté
-        string name;
-        string img;
-        string rarity;
-        bool redeem;
+        uint256 id;          // Identifiant de la carte
+        string realID;       // Identifiant réel de la carte
+        string name;         // Nom de la carte
+        string img;          // URL de l'image de la carte
+        string rarity;       // Rareté de la carte
+        bool exchange;       // État d'échange de la carte
     }
 
     mapping(uint256 => Card) public cards;
@@ -38,13 +38,13 @@ contract Collection is ERC721URIStorage {
 
     function mintTo(
         address to,
-        string memory realID, 
+        string memory realID,
         string memory cardName,
         string memory cardImage,
         string memory rarity,
-        bool redeem
+        bool exchange
     ) external returns (uint256) {
-        require(_tokenIdCounter < cardCount, "Max card count reached");
+        require(_tokenIdCounter <= cardCount, "Max card count reached");
 
         uint256 newCardId = _tokenIdCounter;
         _tokenIdCounter += 1;
@@ -56,31 +56,27 @@ contract Collection is ERC721URIStorage {
             name: cardName,
             img: cardImage,
             rarity: rarity,
-            redeem: redeem
+            exchange: exchange
         });
 
         return newCardId;
     }
 
-    function getCard(uint256 cardId) external view returns (uint256, string memory, string memory, string memory, string memory, bool) {
+    function getCard(uint256 cardId) 
+        external view 
+        returns (uint256, string memory, string memory, string memory, string memory, bool) {
         require(ownerOf(cardId) != address(0), "Card does not exist");
         Card memory card = cards[cardId];
-        return (card.id, card.realID, card.name, card.img, card.rarity, card.redeem);
+        return (card.id, card.realID, card.name, card.img, card.rarity, card.exchange);
     }
 
-    // fonction pour changer la valeur de bool redeem
-    function setRedeemStatus(uint256 cardId, bool newRedeemStatus, address userAddress) public {
-        // require(ownerOf(cardId) == msg.sender, "Only the owner can change redeem status");
-        require(ownerOf(cardId) == userAddress, "Only the owner can change redeem status");
-        cards[cardId].redeem = newRedeemStatus;
+    function setExchangeStatus(uint256 cardId, bool newExchangeStatus, address userAddress) public {
+        require(ownerOf(cardId) == userAddress, "Only the owner can change exchange status");
+        cards[cardId].exchange = newExchangeStatus;
     }
 
-    // fonction pour echanger de carte; prend cardId, userTo, userFrom
-    function transferCard(uint256 cardId, address userFrom, address userTo) external {
-        require(ownerOf(cardId) == userFrom, "UserFrom is not the owner of the card");
-        require(msg.sender == userFrom || msg.sender == owner, "Only the card owner or contract owner can initiate a transfer");
-
-        _transfer(userFrom, userTo, cardId);
-        setRedeemStatus(cardId, false, userFrom);
+    function assignCard(uint256 cardId, address userTo) external {
+        require(msg.sender == owner, "Only the card owner or contract owner can initiate an assign");
+        _transfer(msg.sender, userTo, cardId);
     }
 }
