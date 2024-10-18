@@ -79,6 +79,25 @@ const mainContractABI = [
     "payable": false,
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      { "name": "collectionId", "type": "uint256" },
+      { "name": "cardId", "type": "uint256" }
+    ],
+    "name": "getCardMetadata",
+    "outputs": [
+      { "name": "id", "type": "uint256" },
+      { "name": "realID", "type": "string" },
+      { "name": "name", "type": "string" },
+      { "name": "img", "type": "string" },
+      { "name": "rarity", "type": "string" },
+      { "name": "redeem", "type": "bool" }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
 
@@ -380,6 +399,7 @@ app.put('/collection/:collectionId/card/:cardId/redeem', async (req, res) => {
 
     res.status(200).json({ message: 'Redeem status updated successfully', tx: tx });
   } catch (error) {
+    console.error('Error updating redeem status:', error);
     console.error('Error updating redeem status:', error);
     res.status(500).json({ error: error.message });
   }

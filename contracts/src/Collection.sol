@@ -69,7 +69,7 @@ contract Collection is ERC721URIStorage {
     }
 
     // fonction pour changer la valeur de bool redeem
-    function setRedeemStatus(uint256 cardId, bool newRedeemStatus, address userAddress) external {
+    function setRedeemStatus(uint256 cardId, bool newRedeemStatus, address userAddress) public {
         // require(ownerOf(cardId) == msg.sender, "Only the owner can change redeem status");
         require(ownerOf(cardId) == userAddress, "Only the owner can change redeem status");
         cards[cardId].redeem = newRedeemStatus;
