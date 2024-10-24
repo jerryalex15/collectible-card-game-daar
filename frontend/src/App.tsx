@@ -76,6 +76,7 @@ export const App = () => {
     try {
       const response = await axios.post('http://localhost:3000/mint-card', {
         collectionId: collectionId,
+        userAddress: wallet?.details.account
       });
       setResponseMessage(response.data.message || 'Card minted successfully!');
       setCollectionId('');
@@ -184,6 +185,28 @@ export const App = () => {
       setCollectionId('');
     } catch (error: any) {
       setResponseMessage('Error removing card from sale: ' + (error.response?.data.error || error.message));
+    }
+  };
+
+  // Fonction pour acheter une carte
+  const handleBuyCard = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setResponseMessage('');
+    setLoading(true);
+
+    try {
+      const response = await axios.post('http://localhost:3000/buy-card', {
+        collectionId: parseInt(collectionId),
+        cardId: parseInt(cardId),
+        buyerAddress: wallet?.details.account, // Adresse de l'utilisateur connecté
+      });
+      setResponseMessage(response.data.message || 'Card bought successfully!');
+      setCardId('');
+      setCollectionId('');
+    } catch (error: any) {
+      setResponseMessage('Error buying card: ' + (error.response?.data.error || error.message));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -369,6 +392,38 @@ export const App = () => {
           <button type="submit">Retirer de la vente</button>
         </form>
         {responseMessage && <p>{responseMessage}</p>}
+      </div>
+      {/* Formulaire pour acheter une carte */}
+      <div className={styles.formContainer}>
+        <h2>Buy a Card</h2>
+        <form onSubmit={handleBuyCard} className={styles.form}>
+          <div className={styles.inputGroup}>
+            <label>
+              Collection ID:
+              <input
+                type="text"
+                value={collectionId}
+                onChange={(e) => setCollectionId(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+          <div className={styles.inputGroup}>
+            <label>
+              Card ID:
+              <input
+                type="text"
+                value={cardId}
+                onChange={(e) => setCardId(e.target.value)}
+                required
+              />
+            </label>
+          </div>
+          <button type="submit" className={styles.submitButton} disabled={loading}>
+            {loading ? 'Buying...' : 'Buy Card'}
+          </button>
+        </form>
+        {responseMessage && <p className={styles.responseMessage}>{responseMessage}</p>}
       </div>
 
     </div>

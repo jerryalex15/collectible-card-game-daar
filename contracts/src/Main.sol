@@ -44,6 +44,7 @@ contract Main is Ownable {
     }
 
     function mintCard(
+        address user,
         uint256 collectionId, 
         string memory realID, 
         string memory cardName, 
@@ -53,6 +54,7 @@ contract Main is Ownable {
         uint256 price // Ajouter le prix ici
     ) external onlyOwner {
         require(collectionId < collectionCounter, "Collection does not exist");
+        require(user == msg.sender, "Only owner can mint cards");
 
         Collection collection = Collection(collections[collectionId].collectionAddress);
         
@@ -73,12 +75,23 @@ contract Main is Ownable {
     function removeCardFromSale(uint256 collectionId, uint256 cardId, address userOwner) external {
         require(collectionId < collectionCounter, "Collection does not exist");
         Collection collection = Collection(collections[collectionId].collectionAddress);
-        require(collection.ownerOf(cardId) == msg.sender, "Only the card owner can remove it from sale");
+        require(collection.ownerOf(cardId) == userOwner, "Only the card owner can remove it from sale");
         collection.setSaleStatus(cardId, false, 0, userOwner); // Retirer la carte de la vente
 
         emit CardRemovedFromSale(collectionId, cardId);
     }
 
+    function getCardPrice(uint256 collectionId, uint256 cardId) external view returns (uint256) {
+        Collection collection = Collection(collections[collectionId].collectionAddress);
+        return collection.getPrice(cardId); // Adjust this to your actual structure
+    }
+
+    function buyCardOnSale(uint256 collectionId, uint256 cardId, address buyer) external payable {
+        require(collectionId < collectionCounter, "Collection does not exist");
+        Collection collection = Collection(collections[collectionId].collectionAddress); 
+        // Effectuer l'achat de la carte
+        collection.buyCard{value: msg.value}(cardId, buyer); // Appel de la fonction buyCard de la collection
+    }
 
     function getAllCardsOnSale() public view returns (CardWithCollection[] memory) {
         uint256 totalCardsCount = 0;

@@ -61,7 +61,7 @@ app.post('/create-collection', async (req, res) => {
 
 // Route pour mint une carte NFT à un utilisateur (on va dire au hasard)
 app.post('/mint-card', async (req, res) => {
-  const { collectionId } = req.body; // Récupérer les informations de la requête
+  const { collectionId, userAddress } = req.body; // Récupérer les informations de la requête
   console.log('Received collectionId for minting:', collectionId); // Log
   const { mainContract, collectionABI,provider } = await main.init();
   try {
@@ -79,13 +79,14 @@ app.post('/mint-card', async (req, res) => {
     cards.length
     for (let i = 0; i < collectionCount; i++) {
         const tx = await mainContract.mintCard(
-        collectionId, 
-        cards[i].id, 
-        cards[i].name, 
-        cards[i].images.small, 
-        cards[i].rarity, 
-        false, 
-        Math.floor(cards[i].cardmarket.prices.averageSellPrice));
+          userAddress,
+          collectionId, 
+          cards[i].id, 
+          cards[i].name, 
+          cards[i].images.small, 
+          cards[i].rarity, 
+          false, 
+          Math.floor(cards[i].cardmarket.prices.averageSellPrice));
       await tx.wait(); // Attendre que la transaction soit confirmée
     }
 
@@ -217,8 +218,6 @@ app.get('/get-all-cards-on-sale', async (req, res) => {
 });
 
 
-
-
 // API Endpoint to get all cards owned by a user in a specific collection with metadata
 app.get('/api/collection/:collectionId/user/:userAddress/cards', async (req, res) => {
   const { collectionId, userAddress } = req.params;
@@ -246,8 +245,8 @@ app.get('/api/collection/:collectionId/user/:userAddress/cards', async (req, res
         name: card[2],
         image: card[3], // Assuming img is a URL or base64 data
         rarity: card[4],
-        onSale: cardMetadata[5],
-        price:  BigNumber.from(cardMetadata[6]).toString()
+        onSale: card[5],
+        price:  BigNumber.from(card[6]).toString()
       };
     }));
 
@@ -295,12 +294,12 @@ app.get('/user/:userAddress/cards', async (req, res) => {
 
 
 // Route to retrieve metadata for a specific NFT within a collection
-app.get('/collection/:collectionId/nft/:tokenId', async (req, res) => {
-  const { collectionId, tokenId } = req.params;
+app.get('/collection/:collectionId/nft/:cardId', async (req, res) => {
+  const { collectionId, cardId } = req.params;
   const { mainContract, collectionABI,provider } = await main.init();
 
   try {
-    const card = await mainContract.getCardMetadata(collectionId, tokenId);
+    const card = await mainContract.getCardMetadata(collectionId, cardId);
 
     // Construct metadata based on all the card attributes
     const metadata = {
@@ -321,40 +320,20 @@ app.get('/collection/:collectionId/nft/:tokenId', async (req, res) => {
 });
 
 // API Endpoint to buy a card
-app.post('/api/collection/:collectionId/card/:cardId/buy', async (req, res) => {
-  const { collectionId, cardId } = req.params;
-  const { buyerAddress } = req.body; // The buyer's address should be passed in the request body
+app.post('/buy-card', async (req, res) => {
+  const { collectionId, cardId, buyerAddress } = req.body;
   const { mainContract, collectionABI,provider } = await main.init();
-  
+
   try {
-    // Retrieve the collection address from the Main contract
-    const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
-    
-    // Create a new instance of the Collection contract
-    const collectionContract = new ethers.Contract(collectionAddress, collectionABI, provider);
-
-    // Fetch card metadata to check if it's on sale and the price
-    const card = await collectionContract.getCard(cardId);
-    const cardOnSale = card[5]; // Assuming the card's 'onSale' status is at index 5
-    const cardPrice = BigNumber.from(card[6]).toString()  
-
-    if (!cardOnSale) {
-      return res.status(400).json({ error: 'This card is not for sale.' });
-    }
-
-    // Prepare the transaction to buy the card
-    const tx = await collectionContract.buyCard(cardId);
-
-    // Wait for the transaction to be mined
-    const receipt = await tx.wait();
-
-    res.status(200).json({
-      message: 'Card purchased successfully',
-      transactionHash: receipt.transactionHash,
-    });
+    // Acheter la carte
+    // Fetch the price of the card from the contract
+    const cardPrice = await mainContract.getCardPrice(collectionId, cardId);
+    const tx = await mainContract.buyCardOnSale(collectionId, cardId, buyerAddress,{value: cardPrice});
+    await tx.wait(); // Attendre que la transaction soit confirmée
+    res.json({ message: 'Card bought successfully!', txHash: tx.hash });
   } catch (error) {
     console.error('Error buying card:', error);
-    res.status(500).json({ error: 'Failed to purchase the card', details: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -363,29 +342,6 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-
-
-// // API Endpoint to update the exchange status of a card
-// app.put('/collection/:collectionId/card/:cardId/exchange', async (req, res) => {
-//   const { collectionId, cardId } = req.params;
-//   const { userAddress, newStatus } = req.body;
-  
-//   const signer = provider.getSigner();
-//   console.log(signer);
-  
-//   const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
-//   const collectionContract = new ethers.Contract(collectionAddress, collectionABI, signer);
-//   try {
-//     const tx = await collectionContract.setExchangeStatus(cardId, newStatus, userAddress);
-//     await tx.wait();
-
-//     res.status(200).json({ message: 'exchange status updated successfully', tx: tx });
-//   } catch (error) {
-//     console.error('Error updating exchange status:', error);
-//     res.status(500).json({ error: error.message });
-//   }
-// });
 
 
 // // Creation de booter

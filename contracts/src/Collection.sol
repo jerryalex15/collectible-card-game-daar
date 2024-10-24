@@ -20,7 +20,6 @@ contract Collection is ERC721URIStorage {
     }
 
     mapping(uint256 => Card) public cards;
-    mapping(uint256 => uint256) public cardsOnSale; // Mapping pour stocker les cartes en vente
     uint256[] public allCardsOnSale; // Liste des identifiants de toutes les cartes en vente
 
     constructor(
@@ -76,6 +75,16 @@ contract Collection is ERC721URIStorage {
         return newCardId;
     }
 
+    function getPrice(uint256 cardId) external view returns (uint256) {
+        require(cardId < cardCount, "Card does not exist");
+        return cards[cardId].price;
+    }
+
+    function isCardOnSale(uint256 cardId) external view returns (bool) {
+        require(cardId < cardCount, "Card does not exist");
+        return cards[cardId].onSale;
+    }
+
     function setSaleStatus(uint256 cardId, bool newSaleStatus, uint256 price, address ownerAddress) public {
         require(ownerOf(cardId) == ownerAddress, "Only the owner can change sale status");
 
@@ -106,15 +115,14 @@ contract Collection is ERC721URIStorage {
         return cardsForSale;
     }
 
-    function buyCard(uint256 cardId) external payable {
+    function buyCard(uint256 cardId, address buyer) external payable {
         require(cards[cardId].onSale, "This card is not for sale");
         uint256 price = cards[cardId].price;
         require(msg.value == price, "Incorrect amount sent");
         address currentOwner = ownerOf(cardId);
-        _transfer(currentOwner, msg.sender, cardId);
+        _transfer(currentOwner, buyer, cardId);
         payable(currentOwner).transfer(msg.value);
         cards[cardId].onSale = false;
-        delete cardsOnSale[cardId]; // Retirer de la liste des cartes en vente
         for (uint256 i = 0; i < allCardsOnSale.length; i++) {
             if (allCardsOnSale[i] == cardId) {
                 allCardsOnSale[i] = allCardsOnSale[allCardsOnSale.length - 1]; // Remplacer par le dernier

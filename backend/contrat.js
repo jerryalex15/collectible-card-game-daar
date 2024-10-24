@@ -178,9 +178,14 @@ export const init = async () => {
         {
             "inputs": [
                 {
-                    "internalType": "uint256",
-                    "name": "cardId",
-                    "type": "uint256"
+                "internalType": "uint256",
+                "name": "cardId",
+                "type": "uint256"
+                },
+                {
+                "internalType": "address",
+                "name": "buyer",
+                "type": "address"
                 }
             ],
             "name": "buyCard",
