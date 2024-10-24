@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "author": "",
   "license": "ISC",
@@ -17,9 +19,11 @@
     "ethers": "^ 5.4",
     "express": "^4.21.1",
     "pokemontcgsdk": "^2.0.0",
+    "suppress-experimental-warnings": "^2.0.0",
     "web3": "^4.13.0"
   },
   "devDependencies": {
-    "@types/node": "^22.7.5"
+    "@types/node": "^22.7.5",
+    "nodemon": "^3.1.7"
   }
 }

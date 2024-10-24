@@ -7,10 +7,17 @@ import '@typechain/hardhat'
 import 'hardhat-gas-reporter'
 import 'hardhat-abi-exporter'
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+// Hardhat configuration
 const config: HardhatUserConfig = {
-  solidity: '0.8.20',
+  solidity: {
+    version: '0.8.20',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200, // Adjust the number of runs for optimization based on your use case
+      },
+    },
+  },
   paths: {
     deploy: './deploy',
     sources: './src',
