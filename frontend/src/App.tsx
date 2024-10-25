@@ -60,7 +60,7 @@ export const App = () => {
     setResponseMessage('');
 
     try {
-      const response = await axios.post('http://localhost:3000/create-collection', {
+      const response = await axios.post('http://localhost:3000/api/create-collection', {
         collectionPokemonID: collectionPokemonID,
       });
       setResponseMessage(response.data.message || 'Collection created successfully!');
@@ -74,7 +74,7 @@ export const App = () => {
   const handleMintCard = async () => {
     setResponseMessage('');
     try {
-      const response = await axios.post('http://localhost:3000/mint-card', {
+      const response = await axios.post('http://localhost:3000/api/mint-card', {
         collectionId: collectionId,
         userAddress: wallet?.details.account
       });
@@ -90,7 +90,7 @@ export const App = () => {
     event.preventDefault();
 
     try {
-      const response = await axios.post(`http://localhost:3000/collection/${collectionId}/card/${cardId}/assign`, {
+      const response = await axios.post(`http://localhost:3000/api/collection/${collectionId}/card/${cardId}/assign`, {
         userTo: userTo,
       });
       setResponseMessage(response.data.message || 'Card assigned successfully!');
@@ -106,7 +106,7 @@ export const App = () => {
     event.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/setOnSale-card', {
+      const response = await axios.post('http://localhost:3000/api/setOnSale-card', {
         cardId: parseInt(cardId),
         collectionId: parseInt(collectionId),
         price: price ? parseInt(price) : 0,
@@ -125,7 +125,7 @@ export const App = () => {
   useEffect(() => {
     const fetchCollections = async () => {
       try {
-        const response = await fetch('http://localhost:3000/collections');
+        const response = await fetch('http://localhost:3000/api/collections');
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des collections');
         }
@@ -144,7 +144,7 @@ export const App = () => {
   // Fonction pour récupérer les cartes possédées par l'utilisateur
   const handleGetUserCards = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/user/${wallet?.details.account}/cards`);
+      const response = await fetch(`http://localhost:3000/api/user/${wallet?.details.account}/cards`);
       const data = await response.json();
       setOwnedCards(data.ownedCards);
     } catch (err: any) {
@@ -157,7 +157,7 @@ export const App = () => {
   useEffect(() => {
     const fetchCardsOnSale = async () => {
       try {
-        const response = await fetch('http://localhost:3000/get-all-cards-on-sale');
+        const response = await fetch('http://localhost:3000/api/get-all-cards-on-sale');
         if (!response.ok) {
           throw new Error('Erreur lors de la récupération des cartes en vente');
         }
@@ -175,7 +175,7 @@ export const App = () => {
     event.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3000/remove-card-from-sale', {
+      const response = await axios.post('http://localhost:3000/api/remove-card-from-sale', {
         cardId: parseInt(cardId),
         collectionId: parseInt(collectionId),
         userAddress: wallet?.details.account, // Si nécessaire
@@ -195,7 +195,7 @@ export const App = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:3000/buy-card', {
+      const response = await axios.post('http://localhost:3000/api/buy-card', {
         collectionId: parseInt(collectionId),
         cardId: parseInt(cardId),
         buyerAddress: wallet?.details.account, // Adresse de l'utilisateur connecté

@@ -1,5 +1,5 @@
 import {ethers} from "ethers";
-import contractsJson from './../frontend/src/contracts.json' with { type: 'json' };
+import contractsJson from '../../frontend/src/contracts.json' with { type: 'json' };
 const contracts = contractsJson.contracts; 
 
 
