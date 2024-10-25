@@ -1,25 +1,62 @@
-import global_styles from '@/styles/styles.module.css';
-import navbar_styles from '@/styles/components/layout/NavBar.module.css';
-import { useWallet } from '@/context/AuthContext';
+import global_styles from '@/styles.module.css'
+import comp_styles from './NavBar.module.css'
+import { useWallet } from '@/context/AuthContext'
 
 const NavBar = () => {
-    const wallet = useWallet();
+  const wallet = useWallet()
 
-    return (
-        <header className={`${navbar_styles.navbar} ${global_styles.container}`}>
-            <nav className={navbar_styles.nav}>
-                <div className={navbar_styles.brand}>
-                    <h2>Adresse : { wallet?.details?.account || 'Non connecté' }</h2>
-                </div>
-                <ul className={navbar_styles.navLinks}>
-                    <li><a href="#accueil" className={navbar_styles.navLink}>Home</a></li>
-                    <li><a href="#collection" className={navbar_styles.navLink}>My Collection</a></li>
-                    <li><a href="#marketplace" className={navbar_styles.navLink}>Marketplace</a></li>
-                    <li><a href="#profil" className={navbar_styles.navLink}>Profile</a></li>
-                </ul>
-            </nav>
-        </header>
-    );
-};
+  return (
+    <ul className={comp_styles.navbar}>
+      <li className={comp_styles.logo}>
+        <img src="src/assets/images/pokemon_logo.png" alt="Logo" />
+      </li>
+      <div className={comp_styles.right_nav}>
+        <li className={comp_styles.account}>
+          <h6>Account : {wallet?.details?.account || 'Non connecté'}</h6>
+        </li>
+        <li className={comp_styles.nav_item}>
+          <a href="home">
+            <img
+              className={comp_styles.navbar_icon}
+              src="src/assets/icons/home.png"
+              alt="Home"
+            />
+            <span>Home</span>
+          </a>
+        </li>
+        <li className={comp_styles.nav_item}>
+          <a href="collection">
+            <img
+              className={comp_styles.navbar_icon}
+              src="src/assets/icons/collection.png"
+              alt="Collection"
+            />
+            <span>Collection</span>
+          </a>
+        </li>
+        <li className={comp_styles.nav_item}>
+          <a href="marketplace">
+            <img
+              className={comp_styles.navbar_icon}
+              src="src/assets/icons/marketplace.png"
+              alt="Marketplace"
+            />
+            <span>Marketplace</span>
+          </a>
+        </li>
+        <li className={comp_styles.nav_item}>
+          <a href="profile">
+            <img
+              className={comp_styles.navbar_icon}
+              src="src/assets/icons/profile.png"
+              alt="Profile"
+            />
+            <span>Profile</span>
+          </a>
+        </li>
+      </div>
+    </ul>
+  )
+}
 
-export default NavBar;
+export default NavBar

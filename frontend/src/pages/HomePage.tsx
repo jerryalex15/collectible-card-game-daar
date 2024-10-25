@@ -1,23 +1,57 @@
-import global_styles '@/styles/styles.module.css'
-import navbar_styles '@/styles/pages/HomePage.css'
+import { useWallet } from '@/context/AuthContext'
+import styles from './HomePage.module.css'
 
+export function HomePage() {
+  const wallet = useWallet()
 
-interface HomePageProps {
-    route: {
-        params: {
-            wallet: any;
-        };
-    };
-}
+  return (
+    <div className={styles.homepage}>
+      <section className={styles.hero_section}>
+        <h1>Bienvenue dans le Monde du TCG Pokémon !</h1>
+        <p>
+          Explorez, collectionnez et combattez avec vos cartes Pokémon
+          favorites.
+        </p>
+      </section>
 
-const HomePage: React.FC<HomePageProps> = ({ route }) => {
-    const { wallet } = route.params;
-    return (
-        <div className={global_styles.body}>
-            <h1>Welcome to Pokémon TCG</h1>
-            <p>Wallet : {wallet ? wallet.details.account : 'Non connecté'}</p>
+      <div className={styles.grid_container}>
+        <div className={styles.card}>
+          <img
+            src="src/assets/icons/collection.png"
+            alt="Collection"
+            className={styles.card_icon}
+          />
+          <h2>Collection</h2>
+          <p>Gérez et visualisez les collections.</p>
+          <a href="collection" className={styles.card_link}>
+            Explorer
+          </a>
         </div>
-    )
+        <div className={styles.card}>
+          <img
+            src="src/assets/icons/marketplace.png"
+            alt="Marketplace"
+            className={styles.card_icon}
+          />
+          <h2>Marketplace</h2>
+          <p>Achetez, vendez et échangez vos cartes.</p>
+          <a href="marketplace" className={styles.card_link}>
+            Explorer
+          </a>
+        </div>
+        <div className={styles.card}>
+          <img
+            src="src/assets/icons/profile.png"
+            alt="Profile"
+            className={styles.card_icon}
+          />
+          <h2>Profil</h2>
+          <p>Gérez vos informations de compte.</p>
+          <a href="profile" className={styles.card_link}>
+            Explorer
+          </a>
+        </div>
+      </div>
+    </div>
+  )
 }
-
-export default HomePage;
