@@ -16,6 +16,7 @@ const config: HardhatUserConfig = {
         enabled: true,
         runs: 200, // Adjust the number of runs for optimization based on your use case
       },
+      viaIR: true,
     },
   },
   paths: {
