@@ -4,6 +4,7 @@ import cors from 'cors';
 import collectionRoutes from './routes/collectionRoutes.js';
 import cardRoutes from './routes/cardRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import boosterRoutes from './routes/boosterRoutes.js';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(cors({
 app.use('/api', collectionRoutes);
 app.use('/api', cardRoutes);
 app.use('/api', userRoutes);
+app.use('/api', boosterRoutes);
 
 // Lancer le serveur
 const PORT = 3000;

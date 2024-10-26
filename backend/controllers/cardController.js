@@ -127,14 +127,14 @@ export const getCardMetadata = async (req, res) => {
 
 export const assignCard = async (req, res) => {
     const { collectionId, cardId } = req.params;
-    const { userTo } = req.body;
+    const { userFrom, userTo } = req.body;
     const { mainContract, collectionABI, provider } = await main.init();
 
     try {
         const collectionAddress = (await mainContract.getCollectionInfo(collectionId))[1];
         const collectionContract = new ethers.Contract(collectionAddress, collectionABI, provider.getSigner());
 
-        const tx = await collectionContract.assignCard(cardId, userTo);
+        const tx = await collectionContract.assignCard(cardId, userFrom, userTo);
         await tx.wait();
 
         res.status(200).json({ message: 'Card assigned successfully', tx: tx });
