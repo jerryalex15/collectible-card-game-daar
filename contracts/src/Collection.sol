@@ -10,15 +10,17 @@ contract Collection is ERC721URIStorage {
     address public owner;
 
     struct Card {
-        uint256 id;
-        string realID; // Nouveau champ ajouté
-        string name;
-        string img;
-        string rarity;
-        bool redeem;
+        uint256 id;          // Identifiant de la carte
+        string realID;       // Identifiant réel de la carte
+        string name;         // Nom de la carte
+        string img;          // URL de l'image de la carte
+        string rarity;       // Rareté de la carte
+        bool onSale;        // État de vente de la carte
+        uint256 price;      // Prix de la carte si elle est en vente
     }
 
     mapping(uint256 => Card) public cards;
+    uint256[] public allCardsOnSale; // Liste des identifiants de toutes les cartes en vente
 
     constructor(
         string memory _name,
@@ -36,13 +38,19 @@ contract Collection is ERC721URIStorage {
         _;
     }
 
+    // Dans le contrat Collection
+    function getAllCardsOnSaleLength() public view returns (uint256) {
+        return allCardsOnSale.length;
+    }
+
     function mintTo(
         address to,
-        string memory realID, 
+        string memory realID,
         string memory cardName,
         string memory cardImage,
         string memory rarity,
-        bool redeem
+        bool onSale,
+        uint256 price 
     ) external returns (uint256) {
         require(_tokenIdCounter < cardCount, "Max card count reached");
 
@@ -56,31 +64,83 @@ contract Collection is ERC721URIStorage {
             name: cardName,
             img: cardImage,
             rarity: rarity,
-            redeem: redeem
+            onSale: onSale,
+            price: price
         });
+
+        if (onSale) {
+            allCardsOnSale.push(newCardId); // Ajouter à la liste des cartes en vente
+        }
 
         return newCardId;
     }
 
-    function getCard(uint256 cardId) external view returns (uint256, string memory, string memory, string memory, string memory, bool) {
+    function getPrice(uint256 cardId) external view returns (uint256) {
+        require(cardId < cardCount, "Card does not exist");
+        return cards[cardId].price;
+    }
+
+    function isCardOnSale(uint256 cardId) external view returns (bool) {
+        require(cardId < cardCount, "Card does not exist");
+        return cards[cardId].onSale;
+    }
+
+    function setSaleStatus(uint256 cardId, bool newSaleStatus, uint256 price, address ownerAddress) public {
+        require(ownerOf(cardId) == ownerAddress, "Only the owner can change sale status");
+
+        // Vérifiez si la carte est déjà en vente
+        if (newSaleStatus) {
+            require(cards[cardId].onSale == false, "This card is already on sale"); // Empêche la mise en vente si elle est déjà en vente
+            cards[cardId].price = price; // Mettre le prix si on met la carte en vente
+            cards[cardId].onSale = newSaleStatus; // Marquer la carte comme en vente
+            allCardsOnSale.push(cardId); // Ajouter à la liste des cartes en vente
+        } else {
+            // Si on retire la carte de la vente
+            cards[cardId].onSale = newSaleStatus; // Marquer la carte comme non en vente
+            for (uint256 i = 0; i < allCardsOnSale.length; i++) {
+                if (allCardsOnSale[i] == cardId) {
+                    allCardsOnSale[i] = allCardsOnSale[allCardsOnSale.length - 1]; // Remplacer par le dernier
+                    allCardsOnSale.pop(); // Retirer le dernier élément
+                    break;
+                }
+            }
+        }
+    }
+
+    function getCardsOnSale() external view returns (Card[] memory) {
+        Card[] memory cardsForSale = new Card[](allCardsOnSale.length);
+        for (uint256 i = 0; i < allCardsOnSale.length; i++) {
+            cardsForSale[i] = cards[allCardsOnSale[i]];
+        }
+        return cardsForSale;
+    }
+
+    function buyCard(uint256 cardId, address buyer) external payable {
+        require(cards[cardId].onSale, "This card is not for sale");
+        uint256 price = cards[cardId].price;
+        require(msg.value == price, "Incorrect amount sent");
+        address currentOwner = ownerOf(cardId);
+        _transfer(currentOwner, buyer, cardId);
+        payable(currentOwner).transfer(msg.value);
+        cards[cardId].onSale = false;
+        for (uint256 i = 0; i < allCardsOnSale.length; i++) {
+            if (allCardsOnSale[i] == cardId) {
+                allCardsOnSale[i] = allCardsOnSale[allCardsOnSale.length - 1]; // Remplacer par le dernier
+                allCardsOnSale.pop(); // Retirer le dernier élément
+                break;
+            }
+        }
+    }
+
+    function getCard(uint256 cardId) 
+        external view 
+        returns (uint256, string memory, string memory, string memory, string memory, bool, uint256) {
         require(ownerOf(cardId) != address(0), "Card does not exist");
         Card memory card = cards[cardId];
-        return (card.id, card.realID, card.name, card.img, card.rarity, card.redeem);
+        return (card.id, card.realID, card.name, card.img, card.rarity, card.onSale, card.price);
     }
 
-    // fonction pour changer la valeur de bool redeem
-    function setRedeemStatus(uint256 cardId, bool newRedeemStatus, address userAddress) public {
-        // require(ownerOf(cardId) == msg.sender, "Only the owner can change redeem status");
-        require(ownerOf(cardId) == userAddress, "Only the owner can change redeem status");
-        cards[cardId].redeem = newRedeemStatus;
-    }
-
-    // fonction pour echanger de carte; prend cardId, userTo, userFrom
-    function transferCard(uint256 cardId, address userFrom, address userTo) external {
-        require(ownerOf(cardId) == userFrom, "UserFrom is not the owner of the card");
-        require(msg.sender == userFrom || msg.sender == owner, "Only the card owner or contract owner can initiate a transfer");
-
-        _transfer(userFrom, userTo, cardId);
-        setRedeemStatus(cardId, false, userFrom);
+    function assignCard(uint256 cardId,address from, address userTo) external {
+        _transfer(from, userTo, cardId); 
     }
 }
