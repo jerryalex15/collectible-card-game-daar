@@ -1,33 +1,39 @@
-import React from 'react';
-import CardItem from './CardItem';
+import React from 'react'
+import CardItem from './CardItem'
+import styles from './CardList.module.css'
 
-interface Card {
-  cardId: number;
-  name: string;
-  img: string;
-  rarity: string;
-  price: string; // Ensure price is included
-  collectionId: number; // Ensure collectionId is included
+type Card = {
+  cardId: string // Utilisez le type correct pour cardId
+  realID: string // ID réel de la carte
+  name: string // Nom de la carte
+  img: string // URL de l'image
+  description: string // Description de la carte
+  rarity: string // Rareté de la carte
+  onSale: boolean // Indique si la carte est en vente
+  price: string // Prix de la carte
+  playerHasCard: boolean // Indique si le joueur possède la carte
 }
 
 interface CardListProps {
-  cards: Card[];
-  onBuyCard: (collectionId: number, cardId: number) => void; // Add this prop
+  cards: Card[] // Liste des cartes
+  onAction: (cardId: string) => void // Fonction d'action pour acheter ou vendre
 }
 
-const CardList: React.FC<CardListProps> = ({ cards, onBuyCard }) => {
+function CardList({ cards, onAction }: CardListProps) {
   return (
     <div>
       {cards.map(card => (
         <CardItem
-          key={card.cardId}
-          name={card.name}
-          image={card.img}
-          rarity={card.rarity}
-          price={card.price}
-          collectionId={card.collectionId} // Pass collectionId
-          cardId={card.cardId} // Pass cardId
-          onBuyCard={onBuyCard} // Pass onBuyCard function
+          key={card.cardId} // Utilisez cardId comme clé unique
+          cardId={card.cardId} // ID de la carte
+          realID={card.realID} // ID réel de la carte
+          name={card.name} // Nom de la carte
+          img={card.img} // URL de l'image
+          rarity={card.rarity} // Rareté de la carte
+          onSale={card.onSale} // Indique si la carte est en vente
+          price={card.price} // Prix de la carte
+          playerHasCard={card.playerHasCard} // Indique si le joueur a la carte
+          onAction={onAction} // Passe la fonction d'action
         />
       ))}
     </div>

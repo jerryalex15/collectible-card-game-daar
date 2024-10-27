@@ -1,56 +1,81 @@
-import React, { useRef } from 'react';
-import styles from './CardItem.module.css';
+import React, { useRef } from 'react'
+import styles from './CardItem.module.css'
+import { BigNumber } from 'ethers' // Assurez-vous d'importer BigNumber si vous l'utilisez.
 
 interface CardItemProps {
-  name: string;
-  image: string;
-  rarity: string;
-  price: string;
-  collectionId: number; // Add this prop
-  cardId: number; // Add this prop
-  onBuyCard: (collectionId: number, cardId: number) => void; // Add this prop
+  cardId: string
+  realID: string
+  name: string
+  img: string
+  rarity: string
+  onSale: boolean
+  price: string // Peut être un BigNumber ou string selon l'utilisation
+  playerHasCard: boolean // État si le joueur a la carte
+  onAction: (cardId: string) => void // Fonction pour acheter/vendre la carte
 }
 
-function CardItem({ name, image, rarity, price, collectionId, cardId, onBuyCard }: CardItemProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
+function CardItem({
+  cardId,
+  realID,
+  name,
+  img,
+  rarity,
+  onSale,
+  price,
+  playerHasCard,
+  onAction,
+}: CardItemProps) {
+  const imageRef = useRef<HTMLImageElement>(null) // Référence à l'image
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left; // Position x de la souris dans la carte
-    const y = e.clientY - rect.top; // Position y de la souris dans la carte
+    const image = imageRef.current
+    if (!image) return
+    const rect = image.getBoundingClientRect()
+    const x = e.clientX - rect.left // Position x de la souris dans l'image
+    const y = e.clientY - rect.top // Position y de la souris dans l'image
 
-    const intensity = 10;
+    const intensity = 50 // Intensité de la rotation
 
-    const rotateX = (y / rect.height - 0.5) * intensity;
-    const rotateY = (x / rect.width - 0.5) * -intensity;
+    // Calcul des angles de rotation
+    const rotateX = (y / rect.height - 0.5) * intensity
+    const rotateY = (x / rect.width - 0.5) * -intensity
 
-    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-  };
+    // Application de la transformation uniquement à l'image
+    image.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+  }
 
   const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (card) card.style.transform = '';
-  };
+    const image = imageRef.current
+    if (image) image.style.transform = '' // Réinitialiser la transformation
+  }
 
-  const handleBuyClick = () => {
-    onBuyCard(collectionId, cardId); // Trigger the buy card function
-  };
+  const handleActionClick = () => {
+    onAction(cardId) // Appeler la fonction d'action avec l'ID de la carte
+  }
+
+  // Détermine la classe du bouton
+  const buttonClass = playerHasCard ? styles.sellButton : styles.buyButton
 
   return (
-    <div
-      className={styles.cardItem}
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <img src={image} alt={`${name} image`} className={styles.cardItemImage} />
+    <div className={styles.cardItem}>
+      <img
+        src={img}
+        alt={`${name} image`}
+        className={styles.cardItemImage}
+        ref={imageRef}
+        onMouseMove={handleMouseMove} // Déplacez l'événement ici
+        onMouseLeave={handleMouseLeave} // Déplacez l'événement ici
+      />
       <div className={styles.cardItemContent}>
         <h3 className={styles.cardItemTitle}>{name}</h3>
-        <h5 className={styles.cardItemType}>{rarity}</h5>
-        <h5 className={styles.cardItemType}>{price} wei</h5>
-        <button onClick={handleBuyClick}>Acheter</button> {/* Updated button */}
+        <p className={styles.cardItemRarity}>{rarity}</p>
+        {onSale && <p className={styles.cardItemPrice}>Prix: {price} ETH</p>}
+        <button
+          className={`${styles.cardItemButton} ${buttonClass}`}
+          onClick={handleActionClick}
+        >
+          {playerHasCard ? 'Vendre' : 'Acheter'}
+        </button>
       </div>
     </div>
   );
