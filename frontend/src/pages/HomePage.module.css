@@ -43,7 +43,7 @@
 /* --- Featured Cards Section --- */
 .grid_container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* grille réactive */
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* grille réactive */
     gap: 20px; /* espace entre les cases */
     padding: 20px 0;
 }
