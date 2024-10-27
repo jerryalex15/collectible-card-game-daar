@@ -143,8 +143,6 @@ const useApiMethods = () => {
 
   // Fonction pour récupérer les cartes en vente
   const fetchCardsOnSale = useCallback(async () => {
-  // Récupérer les cartes en vente
-  const fetchCardsOnSale = async () => {
     setLoading(true)
     try {
       const response = await fetch(`${ApiAddress}/get-all-cards-on-sale`)
@@ -186,13 +184,8 @@ const useApiMethods = () => {
     }
   }
 
-  // Fonction pour acheter une carte
-  const handleBuyCard = async (collectionId: number, cardId: number) => {
-    setResponseMessage(''); // Clear previous messages
-    if (!wallet || !wallet.details) return; // Check if wallet is available
-
   // Acheter une carte
-  const handleBuyCard = async (collectionId: string, cardId: string) => {
+  const handleBuyCard = async (collectionId: number, cardId: number) => {
     setResponseMessage('')
     setLoading(true)
     if (!wallet || !wallet.details) return
