@@ -2,9 +2,6 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-pragma solidity ^0.8.2;
-
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 contract Collection is ERC721URIStorage {
     uint256 private _tokenIdCounter;
@@ -143,8 +140,7 @@ contract Collection is ERC721URIStorage {
         return (card.id, card.realID, card.name, card.img, card.rarity, card.onSale, card.price);
     }
 
-    function assignCard(uint256 cardId, address userTo) external {
-        require(msg.sender == owner, "Only the card owner or contract owner can initiate an assign");
-        _transfer(msg.sender, userTo, cardId);
+    function assignCard(uint256 cardId,address from, address userTo) external {
+        _transfer(from, userTo, cardId); 
     }
 }

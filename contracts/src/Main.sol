@@ -3,6 +3,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Collection.sol";
+import "./Booster.sol";
 
 contract Main is Ownable {
     address private _owner;
@@ -18,6 +19,8 @@ contract Main is Ownable {
         uint256 collectionId;
     }
 
+    Booster public boosterContract;
+
     mapping(uint256 => CollectionInfo) public collections;
     uint256 public collectionCounter;
 
@@ -28,6 +31,7 @@ contract Main is Ownable {
 
     constructor() Ownable(msg.sender) {
         collectionCounter = 0;
+        boosterContract = new Booster();
         _owner = msg.sender; 
     }
 
@@ -144,7 +148,7 @@ contract Main is Ownable {
         return collectionContract.getCard(cardId);
     }
 
-    function getAllCardsOwnedByUser(address user) external view returns (uint256[] memory, uint256[] memory) {
+    function getAllCardsOwnedByUser(address user) public view returns (uint256[] memory, uint256[] memory) {
         uint256 totalCardsCount = 0;
 
         for (uint256 i = 0; i < collectionCounter; i++) {
@@ -180,5 +184,39 @@ contract Main is Ownable {
         }
 
         return (collectionIds, cardIds);
+    }
+
+    // Function to create a booster from the user's cards
+    function createBooster(address user, string memory name, uint256 cardCountInBooster) external onlyOwner {
+        require(user == msg.sender, "Only owner can create booster");
+        (uint256[] memory collectionIds, uint256[] memory userCardIds) = getAllCardsOwnedByUser(user);
+        
+        // Pass both collectionIds and userCardIds to the Booster contract
+        boosterContract.createBooster(user, name, collectionIds, userCardIds, cardCountInBooster);
+    }
+
+    // Other functions to interact with the booster
+    function acquireBooster(uint256 boosterId, address user) external payable {
+        boosterContract.acquireBooster{value: msg.value}(boosterId, user); // Call Booster contract
+    }
+    event SenderAddress(address sender);
+    function unpackBooster(uint256 boosterId, address user) external {
+        // Appeler la fonction unpackBoosterIn et récupérer les IDs des cartes et des collections
+        (uint256[] memory cardIds, uint256[] memory collectionIds) = boosterContract.unpackBoosterIn(boosterId, user);
+
+        for (uint256 i = 0; i < cardIds.length; i++) {
+            // Récupérer l'adresse de la collection à partir de collectionIds
+            address collectionAddress = collections[collectionIds[i]].collectionAddress; // Assurez-vous que votre structure CollectionInfo a collectionAddress
+
+            // Créer une instance du contrat de collection
+            Collection collectionContract = Collection(collectionAddress);
+            emit SenderAddress(msg.sender);
+            // Appeler la fonction assignCard pour chaque carte
+            collectionContract.assignCard(cardIds[i], _owner, user);
+        }
+    }
+
+    function listBoosters() external view returns (Booster.BoosterStruct[] memory) {
+        return boosterContract.listAllBoosters();
     }
 }

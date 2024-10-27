@@ -10,12 +10,13 @@ import 'hardhat-abi-exporter'
 // Hardhat configuration
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.20',
+    version: '0.8.2',
     settings: {
       optimizer: {
         enabled: true,
         runs: 200, // Adjust the number of runs for optimization based on your use case
       },
+      viaIR: true,
     },
   },
   paths: {

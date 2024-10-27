@@ -3,7 +3,7 @@ import { useWallet } from './AuthContext'
 import axios from 'axios'
 
 const useApiMethods = () => {
-  const ApiAddress = 'http://localhost:3000'
+  const ApiAddress = 'http://localhost:3000/api'
   const wallet = useWallet()
   const [responseMessage, setResponseMessage] = useState('')
   const [collections, setCollections] = useState([])

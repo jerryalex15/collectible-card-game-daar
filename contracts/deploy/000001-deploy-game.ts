@@ -4,7 +4,7 @@ import { DeployFunction } from 'hardhat-deploy/types'
 const deployer: DeployFunction = async hre => {
   if (hre.network.config.chainId !== 31337) return
   const { deployer } = await hre.getNamedAccounts()
-  await hre.deployments.deploy('Main', { from: deployer, log: true, gasLimit: 10000000 })
+  await hre.deployments.deploy('Main', { from: deployer, log: true, gasLimit: 30000000 })
   // await hre.deployments.deploy('Main', { from: deployer, log: true})
 }
 
