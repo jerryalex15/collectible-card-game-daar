@@ -7,10 +7,12 @@ const useApiMethods = () => {
   const wallet = useWallet()
   const [responseMessage, setResponseMessage] = useState('')
   const [collections, setCollections] = useState([])
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [cardsOnSale, setCardsOnSale] = useState([])
   const [ownedCards, setOwnedCards] = useState([])
+  const [boosters, setBoosters] = useState([])
+
   // Gestion de la création de collection
   const handleCreateCollection = async (collectionPokemonID: string) => {
     setResponseMessage('')
@@ -52,7 +54,7 @@ const useApiMethods = () => {
     }
   }
 
-  // Nouvelle fonction : assigner une carte d'un utilisateur à un autre
+  // Assigner une carte à un utilisateur
   const handleAssignCard = async (
     collectionId: string,
     cardId: string,
@@ -74,7 +76,7 @@ const useApiMethods = () => {
     }
   }
 
-  // Nouvelle fonction : mettre une carte en vente
+  // Mettre une carte en vente
   const handleSetCardOnSale = async (
     collectionId: string,
     cardId: string,
@@ -118,43 +120,38 @@ const useApiMethods = () => {
     }
   }
 
-  // useEffect(() => {
-  //   fetchCollections()
-  // }, [])
-
-
-  // Wrap handleGetUserCards with useCallback
+  // Récupérer les cartes possédées par l'utilisateur
   const handleGetUserCards = useCallback(async () => {
-    if (!wallet || !wallet.details) return;
+    if (!wallet || !wallet.details) return
 
-    setLoading(true);
-    setError(null); // Réinitialiser l'erreur à chaque nouvelle requête
+    setLoading(true)
+    setError(null)
 
     try {
-      const response = await fetch(`${ApiAddress}/user/${wallet.details.account}/cards`);
-      const data = await response.json();
-      setOwnedCards(data.ownedCards);
+      const response = await fetch(
+        `${ApiAddress}/user/${wallet.details.account}/cards`
+      )
+      const data = await response.json()
+      setOwnedCards(data.ownedCards)
     } catch (err: any) {
-      setError(err.response?.data.error || 'Error fetching cards');
+      setError(err.response?.data.error || 'Error fetching cards')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [wallet]); // Dépendance sur wallet
+  }, [wallet])
 
 
   // Fonction pour récupérer les cartes en vente
   const fetchCardsOnSale = useCallback(async () => {
+  // Récupérer les cartes en vente
+  const fetchCardsOnSale = async () => {
     setLoading(true)
     try {
       const response = await fetch(`${ApiAddress}/get-all-cards-on-sale`)
-      if (!response.ok) throw new Error('Erreur lors de la récupération des cartes en vente')
-      
+      if (!response.ok)
+        throw new Error('Erreur lors de la récupération des cartes en vente')
       const data = await response.json()
-      
-      // Mettre à jour l'état des cartes en vente
       setCardsOnSale(data)
-      
-      // Sauvegarder les cartes en vente dans le Local Storage
       localStorage.setItem('cardsOnSale', JSON.stringify(data))
     } catch (err: any) {
       setError(err.message)
@@ -163,11 +160,7 @@ const useApiMethods = () => {
     }
   }, []);
 
-  // useEffect(() => {
-  //   fetchCardsOnSale()
-  // }, [])
-
-  // Fonction pour retirer une carte de la vente
+  // Retirer une carte de la vente
   const handleRemoveCardFromSale = async (
     collectionId: string,
     cardId: string
@@ -198,6 +191,11 @@ const useApiMethods = () => {
     setResponseMessage(''); // Clear previous messages
     if (!wallet || !wallet.details) return; // Check if wallet is available
 
+  // Acheter une carte
+  const handleBuyCard = async (collectionId: string, cardId: string) => {
+    setResponseMessage('')
+    setLoading(true)
+    if (!wallet || !wallet.details) return
     try {
       const response = await axios.post(`${ApiAddress}/buy-card`, {
         collectionId: collectionId,
@@ -210,9 +208,97 @@ const useApiMethods = () => {
     } catch (error: any) {
       setResponseMessage(
         'Error buying card: ' + (error.response?.data.error || error.message)
-      );
+      )
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+
+  // Créer un booster
+  const handleCreateBooster = async (
+    name: string,
+    cardCountInBooster: number
+  ) => {
+    if (!wallet || !wallet.details) return
+    setLoading(true)
+    try {
+      const response = await axios.post(`${ApiAddress}/create-booster`, {
+        userAddress: wallet.details.account,
+        name,
+        cardCountInBooster,
+      })
+      setResponseMessage(
+        response.data.message || 'Booster created successfully!'
+      )
+    } catch (error: any) {
+      setResponseMessage(
+        'Error creating booster: ' +
+          (error.response?.data.error || error.message)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Acquérir un booster
+  const handleAcquireBooster = async (boosterId: string) => {
+    if (!wallet || !wallet.details) return
+    setLoading(true)
+    try {
+      const response = await axios.post(`${ApiAddress}/acquire-booster`, {
+        boosterId,
+        userAddress: wallet.details.account,
+      })
+      setResponseMessage(
+        response.data.message || 'Booster acquired successfully!'
+      )
+    } catch (error: any) {
+      setResponseMessage(
+        'Error acquiring booster: ' +
+          (error.response?.data.error || error.message)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Ouvrir un booster
+  const handleUnpackBooster = async (boosterId: string) => {
+    if (!wallet || !wallet.details) return
+    setLoading(true)
+    try {
+      const response = await axios.post(`${ApiAddress}/unpack-booster`, {
+        boosterId,
+        userAddress: wallet.details.account,
+      })
+      setResponseMessage(
+        response.data.message || 'Booster unpacked successfully!'
+      )
+    } catch (error: any) {
+      setResponseMessage(
+        'Error unpacking booster: ' +
+          (error.response?.data.error || error.message)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Lister tous les boosters
+  const fetchBoosters = async () => {
+    setLoading(true)
+    try {
+      const response = await axios.get(`${ApiAddress}/list-boosters`)
+      setBoosters(response.data.boosters)
+    } catch (error: any) {
+      setError(
+        'Error fetching boosters: ' +
+          (error.response?.data.error || error.message)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return {
     wallet,
@@ -222,6 +308,7 @@ const useApiMethods = () => {
     loading,
     cardsOnSale,
     ownedCards,
+    boosters,
     handleCreateCollection,
     handleMintCard,
     handleAssignCard,
@@ -231,6 +318,10 @@ const useApiMethods = () => {
     fetchCardsOnSale,
     handleRemoveCardFromSale,
     handleBuyCard,
+    handleCreateBooster,
+    handleAcquireBooster,
+    handleUnpackBooster,
+    fetchBoosters,
   }
 }
 

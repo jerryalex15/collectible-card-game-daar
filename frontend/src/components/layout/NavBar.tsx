@@ -45,6 +45,16 @@ const NavBar = () => {
           </a>
         </li>
         <li className={comp_styles.nav_item}>
+          <a href="booster">
+            <img
+              className={comp_styles.navbar_icon}
+              src="src/assets/icons/booster.png"
+              alt="Booster"
+            />
+            <span>Boosters</span>
+          </a>
+        </li>
+        <li className={comp_styles.nav_item}>
           <a href="profile">
             <img
               className={comp_styles.navbar_icon}

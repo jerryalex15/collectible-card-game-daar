@@ -41,6 +41,18 @@ export function HomePage() {
         </div>
         <div className={styles.card}>
           <img
+            src="src/assets/icons/booster.png"
+            alt="Booster"
+            className={styles.card_icon}
+          />
+          <h2>Boosters</h2>
+          <p>Achetez des boosters contenant plusieurs cartes</p>
+          <a href="booster" className={styles.card_link}>
+            Explorer
+          </a>
+        </div>
+        <div className={styles.card}>
+          <img
             src="src/assets/icons/profile.png"
             alt="Profile"
             className={styles.card_icon}
