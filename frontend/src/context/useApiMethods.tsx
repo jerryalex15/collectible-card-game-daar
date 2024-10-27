@@ -122,23 +122,6 @@ const useApiMethods = () => {
   //   fetchCollections()
   // }, [])
 
-  // Fonction pour récupérer les cartes possédées par l'utilisateur
-  // const handleGetUserCards = async () => {
-  //   if (!wallet || !wallet.details) return
-  //   setLoading(true)
-  //   try {
-  //     const response = await fetch(
-  //       `${ApiAddress}/user/${wallet.details.account}/cards`
-  //     )
-  //     const data = await response.json()
-  //     setOwnedCards(data.ownedCards)
-  //   } catch (err: any) {
-  //     setError(err.response?.data.error || 'Error fetching cards')
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
-
 
   // Wrap handleGetUserCards with useCallback
   const handleGetUserCards = useCallback(async () => {
@@ -160,7 +143,7 @@ const useApiMethods = () => {
 
 
   // Fonction pour récupérer les cartes en vente
-  const fetchCardsOnSale = async () => {
+  const fetchCardsOnSale = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch(`${ApiAddress}/get-all-cards-on-sale`)
@@ -178,7 +161,7 @@ const useApiMethods = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, []);
 
   // useEffect(() => {
   //   fetchCardsOnSale()
@@ -211,25 +194,25 @@ const useApiMethods = () => {
   }
 
   // Fonction pour acheter une carte
-  const handleBuyCard = async (collectionId: string, cardId: string) => {
-    setResponseMessage('')
-    setLoading(true)
-    if (!wallet || !wallet.details) return
+  const handleBuyCard = async (collectionId: number, cardId: number) => {
+    setResponseMessage(''); // Clear previous messages
+    if (!wallet || !wallet.details) return; // Check if wallet is available
+
     try {
       const response = await axios.post(`${ApiAddress}/buy-card`, {
-        collectionId: parseInt(collectionId),
-        cardId: parseInt(cardId),
+        collectionId: collectionId,
+        cardId: cardId,
         buyerAddress: wallet.details.account,
-      })
-      setResponseMessage(response.data.message || 'Card bought successfully!')
+      });
+
+      setResponseMessage(response.data.message || 'Card bought successfully!');
+      await fetchCardsOnSale(); // Refresh cards after purchase
     } catch (error: any) {
       setResponseMessage(
         'Error buying card: ' + (error.response?.data.error || error.message)
-      )
-    } finally {
-      setLoading(false)
+      );
     }
-  }
+  };
 
   return {
     wallet,

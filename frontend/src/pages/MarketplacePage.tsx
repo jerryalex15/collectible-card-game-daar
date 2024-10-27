@@ -1,40 +1,42 @@
-import { useEffect, useState } from 'react'
-import global_styles from '@/styles.module.css'
-import page_styles from './MarketplacePage.module.css'
-import CardList from '@/components/cards/CardList'
-import useApiMethods from '@/context/useApiMethods'
+import { useEffect, useState } from 'react';
+import global_styles from '@/styles.module.css';
+import page_styles from './MarketplacePage.module.css';
+import CardList from '@/components/cards/CardList';
+import useApiMethods from '@/context/useApiMethods';
 
 export const MarketplacePage = () => {
-  const { fetchCardsOnSale, loading, error, cardsOnSale } = useApiMethods()
-  const [cards, setCards] = useState([])
 
+  const { fetchCardsOnSale, loading, error, cardsOnSale, handleBuyCard } = useApiMethods();
+  const [cards, setCards] = useState([]);
+
+  // Fetch cards on initial mount
   useEffect(() => {
     const loadCards = async () => {
-      // Vérifier le stockage local d'abord
-      const storedCards = localStorage.getItem('cardsOnSale')
-      if (storedCards) {
-        setCards(JSON.parse(storedCards))
-      } else {
-        // Si pas de données en local, appeler l'API
-        await fetchCardsOnSale()
-      }
-    }
+      await fetchCardsOnSale();
+    };
+    loadCards();
+  }, [fetchCardsOnSale]); // Only depend on fetchCardsOnSale
 
-    loadCards()
-  }, [fetchCardsOnSale]) // Dépendance sur fetchCardsOnSale
-
-  // Mettre à jour l'état des cartes lorsque cardsOnSale change
+  // Update cards whenever cardsOnSale changes
   useEffect(() => {
-    setCards(cardsOnSale) // Met à jour les cartes à partir de l'état de l'API
-  }, [cardsOnSale])
+    setCards(cardsOnSale);
+  }, [cardsOnSale]);
+
+  // Function to handle buying a card
 
   return (
     <div className={page_styles.marketplacePage}>
       <h1>Marketplace</h1>
-      {loading ? <p>Loading cards...</p> : <CardList cards={cards} />}
-      {error && <p className={global_styles.error}>{error}</p>}
+      {loading ? (
+        <p>Loading cards...</p>
+      ) : (
+        <>
+          {error && <p className={global_styles.error}>{error}</p>}
+          <CardList cards={cards} onBuyCard={handleBuyCard} />
+        </>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default MarketplacePage
+export default MarketplacePage;

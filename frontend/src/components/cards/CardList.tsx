@@ -1,32 +1,37 @@
-import CardItem from './CardItem'
-import styles from './CardList.module.css'
+import React from 'react';
+import CardItem from './CardItem';
 
-type Card = {
-  id: number
-  name: string
-  image: string
-  description: string
-  type: string
+interface Card {
+  cardId: number;
+  name: string;
+  img: string;
+  rarity: string;
+  price: string; // Ensure price is included
+  collectionId: number; // Ensure collectionId is included
 }
 
 interface CardListProps {
-  cards: Card[]
+  cards: Card[];
+  onBuyCard: (collectionId: number, cardId: number) => void; // Add this prop
 }
 
-function CardList({ cards }: CardListProps) {
+const CardList: React.FC<CardListProps> = ({ cards, onBuyCard }) => {
   return (
-    <div className={styles.cardList}>
+    <div>
       {cards.map(card => (
         <CardItem
-          key={card.id}
+          key={card.cardId}
           name={card.name}
-          image={card.image}
-          description={card.description}
-          type={card.type}
+          image={card.img}
+          rarity={card.rarity}
+          price={card.price}
+          collectionId={card.collectionId} // Pass collectionId
+          cardId={card.cardId} // Pass cardId
+          onBuyCard={onBuyCard} // Pass onBuyCard function
         />
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default CardList
+export default CardList;
