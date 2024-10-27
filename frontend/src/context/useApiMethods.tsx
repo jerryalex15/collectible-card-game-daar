@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useWallet } from './AuthContext'
 import axios from 'axios'
 
@@ -118,36 +118,61 @@ const useApiMethods = () => {
     }
   }
 
-  useEffect(() => {
-    fetchCollections()
-  }, [])
+  // useEffect(() => {
+  //   fetchCollections()
+  // }, [])
 
   // Fonction pour récupérer les cartes possédées par l'utilisateur
-  const handleGetUserCards = async () => {
-    if (!wallet || !wallet.details) return
-    setLoading(true)
+  // const handleGetUserCards = async () => {
+  //   if (!wallet || !wallet.details) return
+  //   setLoading(true)
+  //   try {
+  //     const response = await fetch(
+  //       `${ApiAddress}/user/${wallet.details.account}/cards`
+  //     )
+  //     const data = await response.json()
+  //     setOwnedCards(data.ownedCards)
+  //   } catch (err: any) {
+  //     setError(err.response?.data.error || 'Error fetching cards')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+
+  // Wrap handleGetUserCards with useCallback
+  const handleGetUserCards = useCallback(async () => {
+    if (!wallet || !wallet.details) return;
+
+    setLoading(true);
+    setError(null); // Réinitialiser l'erreur à chaque nouvelle requête
+
     try {
-      const response = await fetch(
-        `${ApiAddress}/user/${wallet.details.account}/cards`
-      )
-      const data = await response.json()
-      setOwnedCards(data.ownedCards)
+      const response = await fetch(`${ApiAddress}/user/${wallet.details.account}/cards`);
+      const data = await response.json();
+      setOwnedCards(data.ownedCards);
     } catch (err: any) {
-      setError(err.response?.data.error || 'Error fetching cards')
+      setError(err.response?.data.error || 'Error fetching cards');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [wallet]); // Dépendance sur wallet
+
 
   // Fonction pour récupérer les cartes en vente
   const fetchCardsOnSale = async () => {
     setLoading(true)
     try {
       const response = await fetch(`${ApiAddress}/get-all-cards-on-sale`)
-      if (!response.ok)
-        throw new Error('Erreur lors de la récupération des cartes en vente')
+      if (!response.ok) throw new Error('Erreur lors de la récupération des cartes en vente')
+      
       const data = await response.json()
+      
+      // Mettre à jour l'état des cartes en vente
       setCardsOnSale(data)
+      
+      // Sauvegarder les cartes en vente dans le Local Storage
+      localStorage.setItem('cardsOnSale', JSON.stringify(data))
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -155,9 +180,9 @@ const useApiMethods = () => {
     }
   }
 
-  useEffect(() => {
-    fetchCardsOnSale()
-  }, [])
+  // useEffect(() => {
+  //   fetchCardsOnSale()
+  // }, [])
 
   // Fonction pour retirer une carte de la vente
   const handleRemoveCardFromSale = async (
@@ -207,6 +232,7 @@ const useApiMethods = () => {
   }
 
   return {
+    wallet,
     responseMessage,
     collections,
     error,
