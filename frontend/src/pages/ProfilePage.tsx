@@ -18,7 +18,7 @@ export const ProfilePage = () => {
   // État pour gérer la modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [price, setPrice] = useState('');
-  const [selectedCard, setSelectedCard] = useState<{ collectionId: string; cardId: number } | null>(null);
+  const [selectedCard, setSelectedCard] = useState<{ collectionId: number; cardId: number } | null>(null);
 
   // Effect pour charger les cartes de l'utilisateur en fonction du compte
   useEffect(() => {
@@ -51,7 +51,7 @@ export const ProfilePage = () => {
   };
 
   // Ouvrir la modal pour mettre la carte en vente
-  const openModal = (collectionId: string, cardId: number) => {
+  const openModal = (collectionId: number, cardId: number) => {
     console.log('Opening modal for collection:', collectionId, 'and card:', cardId); // Vérifiez que cette ligne s'affiche
     setSelectedCard({ collectionId, cardId });
     setIsModalOpen(true);

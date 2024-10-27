@@ -3,15 +3,15 @@ import styles from './CardItem.module.css'
 import { BigNumber } from 'ethers' // Assurez-vous d'importer BigNumber si vous l'utilisez.
 
 interface CardItemProps {
-  cardId: string
-  realID: string
+  cardId: number
+  realID: number
   name: string
   img: string
   rarity: string
   onSale: boolean
   price: string // Peut être un BigNumber ou string selon l'utilisation
   playerHasCard: boolean // État si le joueur a la carte
-  onAction: (cardId: string) => void // Fonction pour acheter/vendre la carte
+  onAction: (cardId: number) => void // Fonction pour acheter/vendre la carte
 }
 
 function CardItem({

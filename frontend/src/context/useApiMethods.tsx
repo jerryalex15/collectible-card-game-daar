@@ -78,16 +78,16 @@ const useApiMethods = () => {
 
   // Mettre une carte en vente
   const handleSetCardOnSale = async (
-    collectionId: string,
-    cardId: string,
+    collectionId: number,
+    cardId: number,
     price: string
   ) => {
     if (!wallet || !wallet.details) return
     setLoading(true)
     try {
       const response = await axios.post(`${ApiAddress}/setOnSale-card`, {
-        cardId: parseInt(cardId),
-        collectionId: parseInt(collectionId),
+        cardId: cardId,
+        collectionId: collectionId,
         price: price ? parseInt(price) : 0,
         userAddress: wallet.details.account,
       })

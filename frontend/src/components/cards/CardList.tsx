@@ -3,8 +3,8 @@ import CardItem from './CardItem'
 import styles from './CardList.module.css'
 
 type Card = {
-  cardId: string // Utilisez le type correct pour cardId
-  realID: string // ID réel de la carte
+  cardId: number // Utilisez le type correct pour cardId
+  realID: number // ID réel de la carte
   name: string // Nom de la carte
   img: string // URL de l'image
   description: string // Description de la carte
@@ -16,7 +16,7 @@ type Card = {
 
 interface CardListProps {
   cards: Card[] // Liste des cartes
-  onAction: (cardId: string) => void // Fonction d'action pour acheter ou vendre
+  onAction: (cardId: number) => void // Fonction d'action pour acheter ou vendre
 }
 
 function CardList({ cards, onAction }: CardListProps) {
