@@ -10,7 +10,7 @@ import 'hardhat-abi-exporter'
 // Hardhat configuration
 const config: HardhatUserConfig = {
   solidity: {
-    version: '0.8.2',
+    version: '0.8.20',
     settings: {
       optimizer: {
         enabled: true,
