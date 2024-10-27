@@ -27,7 +27,7 @@
 
 .boosterItemImage {
     width: 100%;
-    height: 150px;
+    height: 200px;
     object-fit: cover;
     border-bottom: 1px solid var(--secondary-color);
     transition: transform 0.1s ease-out;

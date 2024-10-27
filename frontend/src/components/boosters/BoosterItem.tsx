@@ -1,43 +1,42 @@
-import React, { useRef } from 'react'
-import styles from './BoosterItem.module.css'
+// BoosterItem.tsx
+import React, { useRef } from 'react';
+import styles from './BoosterItem.module.css';
 
 interface BoosterItemProps {
-  name: string
-  image: string
-  description: string
-  type: string
-  action?: () => void // Nouvelle prop pour l'action
-  actionLabel?: string // Nouvelle prop pour le texte du bouton
+  name: string;
+  image: string;
+  type: string;
+  action?: () => void;
+  actionLabel?: string;
 }
 
 function BoosterItem({
   name,
   image,
-  description,
   type,
   action,
   actionLabel,
 }: BoosterItemProps) {
-  const boosterRef = useRef<HTMLDivElement>(null)
+  const boosterRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const booster = boosterRef.current
-    if (!booster) return
-    const rect = booster.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
+    const booster = boosterRef.current;
+    if (!booster) return;
+    const rect = booster.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    const intensity = 10
-    const rotateX = (y / rect.height - 0.5) * intensity
-    const rotateY = (x / rect.width - 0.5) * -intensity
+    const intensity = 10;
+    const rotateX = (y / rect.height - 0.5) * intensity;
+    const rotateY = (x / rect.width - 0.5) * -intensity;
 
-    booster.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
-  }
+    booster.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  };
 
   const handleMouseLeave = () => {
-    const booster = boosterRef.current
-    if (booster) booster.style.transform = ''
-  }
+    const booster = boosterRef.current;
+    if (booster) booster.style.transform = '';
+  };
 
   return (
     <div
@@ -54,9 +53,6 @@ function BoosterItem({
       <div className={styles.boosterItemContent}>
         <h3 className={styles.boosterItemTitle}>{name}</h3>
         <p className={styles.boosterItemType}>{type}</p>
-        <p className={styles.boosterItemDescription}>{description}</p>
-
-        {/* Bouton d'action conditionnel */}
         {action && actionLabel && (
           <button onClick={action} className={styles.actionButton}>
             {actionLabel}
@@ -64,7 +60,7 @@ function BoosterItem({
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default BoosterItem
+export default BoosterItem;

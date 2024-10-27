@@ -1,36 +1,34 @@
-import BoosterItem from '../boosters/BoosterItem'
-import styles from './BoosterList.module.css'
+// BoosterList.tsx
+import BoosterItem from '../boosters/BoosterItem';
+import styles from './BoosterList.module.css';
 
 type Booster = {
-  id: number
-  name: string
-  image: string
-  description: string
-  type: string
-  action?: () => void // Fonction d'action pour chaque booster
-  actionLabel?: string // Label du bouton pour chaque booster
-}
+  id: number;
+  name: string;
+  type: string;
+  action?: () => void;
+  actionLabel?: string;
+};
 
 interface BoosterListProps {
-  boosters: Booster[]
+  boosters: Booster[];
 }
 
 function BoosterList({ boosters }: BoosterListProps) {
   return (
     <div className={styles.boosterList}>
-      {boosters.map(booster => (
+      {boosters.map((booster) => (
         <BoosterItem
           key={booster.id}
           name={booster.name}
-          image={booster.image}
-          description={booster.description}
+          image="src/assets/images/booster-le-symbole-turbo-vectoriel-du-logo-icône-d-image-vectorielle-159751507.webp"
           type={booster.type}
-          action={booster.action} // Passer l'action spécifique
-          actionLabel={booster.actionLabel} // Passer le label spécifique
+          action={booster.action}
+          actionLabel={booster.actionLabel}
         />
       ))}
     </div>
-  )
+  );
 }
 
-export default BoosterList
+export default BoosterList;

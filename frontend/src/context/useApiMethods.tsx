@@ -234,7 +234,7 @@ const useApiMethods = () => {
   }
 
   // Acquérir un booster
-  const handleAcquireBooster = async (boosterId: string) => {
+  const handleAcquireBooster = async (boosterId: number) => {
     if (!wallet || !wallet.details) return
     setLoading(true)
     try {
@@ -256,7 +256,7 @@ const useApiMethods = () => {
   }
 
   // Ouvrir un booster
-  const handleUnpackBooster = async (boosterId: string) => {
+  const handleUnpackBooster = async (boosterId: number) => {
     if (!wallet || !wallet.details) return
     setLoading(true)
     try {
