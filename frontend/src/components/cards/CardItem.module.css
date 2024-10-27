@@ -7,29 +7,47 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     width: 200px;
-    height: 300px;
+    height: max-content;
     transition: transform 0.2s ease;
     cursor: pointer;
-    perspective: 1000px;
-    /* Pour effet 3D */
-}
-
-.cardItem:hover {
-    transform: translateY(-5px);
+    perspective: 1000px; /* Pour effet 3D */
 }
 
 .cardItemContent {
     padding: 15px;
     text-align: center;
-    transition: transform 0.1s ease-out;
-    /* Transition pour le contenu */
+    transition: transform 0.1s ease-out; /* Transition pour le contenu */
 }
 
 .cardItemImage {
     width: 100%;
-    height: 150px;
+    height: max-content;
     object-fit: cover;
-    border-bottom: 1px solid var(--secondary-color);
-    transition: transform 0.1s ease-out;
-    /* Transition pour l'image */
+    transition: transform 0.1s ease-out; /* Transition pour l'image */
+}
+
+.cardItemButton {
+    margin-top: 10px;
+    padding: 10px 15px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sellButton {
+    background-color: red; /* Rouge pour vendre */
+}
+
+.sellButton:hover {
+    background-color: darkred; /* Couleur plus sombre au survol */
+}
+
+.buyButton {
+    background-color: green; /* Vert pour acheter */
+}
+
+.buyButton:hover {
+    background-color: darkgreen; /* Couleur plus sombre au survol */
 }
