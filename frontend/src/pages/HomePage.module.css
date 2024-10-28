@@ -1,0 +1,87 @@
+@import url("../styles.module.css");
+
+.homepage {
+    text-align: center;
+    padding: 20px;
+}
+
+/* --- Hero Section --- */
+.hero-section {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    padding: 50px 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.hero-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.cta-button {
+    font-size: 1rem;
+    background-color: var(--accent-color);
+    padding: 15px 30px;
+    color: var(--background-color);
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.cta-button:hover {
+    background-color: var(--secondary-color);
+}
+
+/* --- Featured Cards Section --- */
+.grid_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* grille réactive */
+    gap: 20px; /* espace entre les cases */
+    padding: 20px 0;
+}
+
+.card {
+    background-color: var(--background-secondary-color);
+    border: 1px solid var(--secondary-color);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card_icon {
+    width: 60px; /* taille des icônes */
+    height: 60px; /* taille des icônes */
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.card p {
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.card_link {
+    display: inline-block;
+    margin-top: 1rem;
+    text-decoration: none;
+    color: var(--secondary-color);
+    font-weight: bold;
+}

@@ -1,0 +1,8 @@
+@import url("../styles.module.css");
+
+.marketplacePage {
+    display: grid;
+    place-items: center; /* Centre horizontalement et verticalement */
+    min-height: 100vh; /* Prend toute la hauteur de la fenêtre */
+    padding: 20px; /* Ajoutez un peu de marge intérieure si nécessaire */
+  }

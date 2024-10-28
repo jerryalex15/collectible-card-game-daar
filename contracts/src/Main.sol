@@ -3,33 +3,36 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Collection.sol";
+import "./Booster.sol";
 
-contract Main is Ownable { // Inheriting from Ownable
+contract Main is Ownable {
     address private _owner;
+
     struct CollectionInfo {
         string name;
         address collectionAddress;
         uint256 cardCount;
     }
 
+    struct CardWithCollection {
+        Collection.Card card;
+        uint256 collectionId;
+    }
+
+    Booster public boosterContract;
+
     mapping(uint256 => CollectionInfo) public collections;
     uint256 public collectionCounter;
 
     event CollectionCreated(uint256 collectionId, string name, address collectionAddress);
     event CardMinted(uint256 collectionId, uint256 cardId, address owner);
+    event CardPutOnSale(uint256 collectionId, uint256 cardId, uint256 price);
+    event CardRemovedFromSale(uint256 collectionId, uint256 cardId);
 
-    // Constructor for the Main contract
-    constructor() Ownable(msg.sender) { // Pass msg.sender as owner
+    constructor() Ownable(msg.sender) {
         collectionCounter = 0;
-        _owner = msg.sender; //il faut être vigilent avec ceci
-    }
-
-    function owner() public view override returns (address) {
-        return _owner;
-    }
-
-    function getOwner() public view returns (address) {
-        return owner();
+        boosterContract = new Booster();
+        _owner = msg.sender; 
     }
 
     function createCollection(string memory _name, uint256 _cardCount) external onlyOwner {
@@ -44,11 +47,80 @@ contract Main is Ownable { // Inheriting from Ownable
         collectionCounter++;
     }
 
-    function mintCardToUser(uint256 collectionId,address to,string memory img) external onlyOwner {
+    function mintCard(
+        address user,
+        uint256 collectionId, 
+        string memory realID, 
+        string memory cardName, 
+        string memory cardImage, 
+        string memory rarity, 
+        bool onSale, 
+        uint256 price // Ajouter le prix ici
+    ) external onlyOwner {
+        require(collectionId < collectionCounter, "Collection does not exist");
+        require(user == msg.sender, "Only owner can mint cards");
+
+        Collection collection = Collection(collections[collectionId].collectionAddress);
+        
+        uint256 cardId = collection.mintTo(msg.sender, realID, cardName, cardImage, rarity, onSale, price);
+        
+        emit CardMinted(collectionId, cardId, msg.sender);
+    }
+
+    function putCardOnSale(uint256 collectionId, uint256 cardId, uint256 price, address userOwner) external {
         require(collectionId < collectionCounter, "Collection does not exist");
         Collection collection = Collection(collections[collectionId].collectionAddress);
-        uint256 cardId = collection.mintTo(to, img);
-        emit CardMinted(collectionId, cardId, to);
+        require(collection.ownerOf(cardId) == userOwner, "Only the card owner can put it on sale");
+        collection.setSaleStatus(cardId, true, price, userOwner); // Mettre la carte en vente
+
+        emit CardPutOnSale(collectionId, cardId, price);
+    }
+
+    function removeCardFromSale(uint256 collectionId, uint256 cardId, address userOwner) external {
+        require(collectionId < collectionCounter, "Collection does not exist");
+        Collection collection = Collection(collections[collectionId].collectionAddress);
+        require(collection.ownerOf(cardId) == userOwner, "Only the card owner can remove it from sale");
+        collection.setSaleStatus(cardId, false, 0, userOwner); // Retirer la carte de la vente
+
+        emit CardRemovedFromSale(collectionId, cardId);
+    }
+
+    function getCardPrice(uint256 collectionId, uint256 cardId) external view returns (uint256) {
+        Collection collection = Collection(collections[collectionId].collectionAddress);
+        return collection.getPrice(cardId); // Adjust this to your actual structure
+    }
+
+    function buyCardOnSale(uint256 collectionId, uint256 cardId, address buyer) external payable {
+        require(collectionId < collectionCounter, "Collection does not exist");
+        Collection collection = Collection(collections[collectionId].collectionAddress); 
+        // Effectuer l'achat de la carte
+        collection.buyCard{value: msg.value}(cardId, buyer); // Appel de la fonction buyCard de la collection
+    }
+
+    function getAllCardsOnSale() public view returns (CardWithCollection[] memory) {
+        uint256 totalCardsCount = 0;
+
+        // Compter le nombre total de cartes en vente
+        for (uint256 i = 0; i < collectionCounter; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+            totalCardsCount += collection.getAllCardsOnSaleLength(); // Compter les cartes en vente de chaque collection
+        }
+
+        CardWithCollection[] memory allCardsForSale = new CardWithCollection[](totalCardsCount);
+        uint256 index = 0;
+
+        // Récupérer toutes les cartes en vente avec leur collection
+        for (uint256 i = 0; i < collectionCounter; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+            Collection.Card[] memory cardsForSale = collection.getCardsOnSale();
+            for (uint256 j = 0; j < cardsForSale.length; j++) {
+                allCardsForSale[index].card = cardsForSale[j];
+                allCardsForSale[index].collectionId = i; // Associer la collection à l'ID de la collection
+                index++;
+            }
+        }
+
+        return allCardsForSale;
     }
 
     function getCollectionInfo(uint256 collectionId) external view returns (string memory, address, uint256) {
@@ -63,5 +135,88 @@ contract Main is Ownable { // Inheriting from Ownable
             allCollections[i] = collections[i];
         }
         return allCollections;
+    }
+
+    function getCardMetadata(uint256 collectionId, uint256 cardId) 
+        public view 
+        returns (uint256, string memory, string memory, string memory, string memory, bool, uint256) {
+        require(collectionId < collectionCounter, "Collection not exist");
+
+        CollectionInfo memory collection = collections[collectionId];
+        Collection collectionContract = Collection(collection.collectionAddress);
+
+        return collectionContract.getCard(cardId);
+    }
+
+    function getAllCardsOwnedByUser(address user) public view returns (uint256[] memory, uint256[] memory) {
+        uint256 totalCardsCount = 0;
+
+        for (uint256 i = 0; i < collectionCounter; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+            for (uint256 j = 0; j < collections[i].cardCount; j++) {
+                try collection.ownerOf(j) returns (address cardOwner) {
+                    if (cardOwner == user) {  // Remplacer msg.sender par user
+                        totalCardsCount++;
+                    }
+                } catch {
+                    // Ignorer les erreurs, car elles indiquent des cartes non existantes
+                }
+            }
+        }
+
+        uint256[] memory collectionIds = new uint256[](totalCardsCount);
+        uint256[] memory cardIds = new uint256[](totalCardsCount);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < collectionCounter; i++) {
+            Collection collection = Collection(collections[i].collectionAddress);
+            for (uint256 j = 0; j < collections[i].cardCount; j++) {
+                try collection.ownerOf(j) returns (address cardOwner) {
+                    if (cardOwner == user) {  // Remplacer msg.sender par user
+                        collectionIds[index] = i;
+                        cardIds[index] = j;
+                        index++;
+                    }
+                } catch {
+                    // Ignorer les erreurs, car elles indiquent des cartes non existantes
+                }
+            }
+        }
+
+        return (collectionIds, cardIds);
+    }
+
+    // Function to create a booster from the user's cards
+    function createBooster(address user, string memory name, uint256 cardCountInBooster) external onlyOwner {
+        require(user == msg.sender, "Only owner can create booster");
+        (uint256[] memory collectionIds, uint256[] memory userCardIds) = getAllCardsOwnedByUser(user);
+        
+        // Pass both collectionIds and userCardIds to the Booster contract
+        boosterContract.createBooster(user, name, collectionIds, userCardIds, cardCountInBooster);
+    }
+
+    // Other functions to interact with the booster
+    function acquireBooster(uint256 boosterId, address user) external payable {
+        boosterContract.acquireBooster{value: msg.value}(boosterId, user); // Call Booster contract
+    }
+    event SenderAddress(address sender);
+    function unpackBooster(uint256 boosterId, address user) external {
+        // Appeler la fonction unpackBoosterIn et récupérer les IDs des cartes et des collections
+        (uint256[] memory cardIds, uint256[] memory collectionIds) = boosterContract.unpackBoosterIn(boosterId, user);
+
+        for (uint256 i = 0; i < cardIds.length; i++) {
+            // Récupérer l'adresse de la collection à partir de collectionIds
+            address collectionAddress = collections[collectionIds[i]].collectionAddress; // Assurez-vous que votre structure CollectionInfo a collectionAddress
+
+            // Créer une instance du contrat de collection
+            Collection collectionContract = Collection(collectionAddress);
+            emit SenderAddress(msg.sender);
+            // Appeler la fonction assignCard pour chaque carte
+            collectionContract.assignCard(cardIds[i], _owner, user);
+        }
+    }
+
+    function listBoosters() external view returns (Booster.BoosterStruct[] memory) {
+        return boosterContract.listAllBoosters();
     }
 }
