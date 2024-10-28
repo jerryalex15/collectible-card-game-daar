@@ -67,7 +67,10 @@ export const ProfilePage = () => {
   // Gérer la soumission du prix
   const handlePriceSubmit = async () => {
     if (selectedCard) {
-      await handleSetCardOnSale(selectedCard.collectionId, selectedCard.cardId.toString(), price);
+       console.log("Selected Card:", selectedCard); // Debug : afficher la carte sélectionnée
+    console.log("Collection ID:", selectedCard.collectionId); // Debug : afficher l'ID de la collection
+    console.log("Price:", price); 
+      await handleSetCardOnSale(selectedCard.collectionId, selectedCard.cardId, price);
     }
     closeModal();
   };
@@ -81,24 +84,27 @@ export const ProfilePage = () => {
       ) : (
         <div>
           {error && <p className={global_styles.error}>{error}</p>}
-          {Object.keys(cardsByCollection).length === 0 ? (
+          {Object.entries(cardsByCollection).length === 0 ? (
             <p>You don't have any cards.</p>
           ) : (
-            <div className={page_styles.cardGrid}>
-              {Object.entries(cardsByCollection).map(([collectionId, cards]) => (
-                <div key={collectionId}>
-                  <h2>Collection {collectionId}</h2>
-                  <div className={page_styles.cardGrid}>
-                    {cards.map(card => (
-                      <div className={page_styles.card} key={card.cardId}>
-                        <img src={card.img} alt={card.name} />
-                        <h3>{card.name}</h3>
-                        <button onClick={() => openModal(collectionId, card.cardId)}>Mise en vente</button>
-                      </div>
-                    ))}
-                  </div>
+            <div className={page_styles.profilePage}>
+              <div className={page_styles.cardGridContainer}>
+                <div className={page_styles.cardGrid}>
+                  {Object.entries(cardsByCollection).map(([collectionId, cards]) => (
+                    <div key={collectionId}>
+                      {cards.map(card => (
+                        <div className={page_styles.card} key={card.cardId}>
+                          <img src={card.img} alt={card.name} />
+                          <h3>{card.name}</h3>
+                          <button onClick={() => openModal(parseInt(collectionId), card.cardId)}>
+                            Mise en vente
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>

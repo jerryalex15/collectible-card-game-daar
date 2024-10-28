@@ -9,9 +9,9 @@ interface CardItemProps {
   img: string
   rarity: string
   onSale: boolean
-  price: string // Peut être un BigNumber ou string selon l'utilisation
-  playerHasCard: boolean // État si le joueur a la carte
-  onAction: (cardId: number) => void // Fonction pour acheter/vendre la carte
+  price: string// Peut être un BigNumber ou string selon l'utilisation
+  collectionId: number
+  onAction: (collectionId: number, cardId: number) => void // Fonction pour acheter/vendre la carte
 }
 
 function CardItem({
@@ -22,7 +22,7 @@ function CardItem({
   rarity,
   onSale,
   price,
-  playerHasCard,
+  collectionId,
   onAction,
 }: CardItemProps) {
   const imageRef = useRef<HTMLImageElement>(null) // Référence à l'image
@@ -50,11 +50,11 @@ function CardItem({
   }
 
   const handleActionClick = () => {
-    onAction(cardId) // Appeler la fonction d'action avec l'ID de la carte
-  }
+    onAction(collectionId, cardId) // Appeler la fonction d'action avec l'ID de la carte
+  } 
 
   // Détermine la classe du bouton
-  const buttonClass = playerHasCard ? styles.sellButton : styles.buyButton
+  const buttonClass = styles.buyButton
 
   return (
     <div className={styles.cardItem}>
@@ -69,12 +69,12 @@ function CardItem({
       <div className={styles.cardItemContent}>
         <h3 className={styles.cardItemTitle}>{name}</h3>
         <p className={styles.cardItemRarity}>{rarity}</p>
-        {onSale && <p className={styles.cardItemPrice}>Prix: {price} ETH</p>}
+        {onSale && <p className={styles.cardItemPrice}>Prix: {price} Wei</p>}
         <button
           className={`${styles.cardItemButton} ${buttonClass}`}
           onClick={handleActionClick}
         >
-          {playerHasCard ? 'Vendre' : 'Acheter'}
+          Acheter
         </button>
       </div>
     </div>

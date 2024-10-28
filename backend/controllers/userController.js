@@ -18,7 +18,8 @@ export const getUserCards = async (req, res) => {
         img: cardMetadata[3],
         rarity: cardMetadata[4],
         onSale: cardMetadata[5],
-        price: BigNumber.from(cardMetadata[6]).toString()
+        price: BigNumber.from(cardMetadata[6]).toString(),
+        collectionId : BigNumber.from(collectionId).toString()
         };
     }));
 

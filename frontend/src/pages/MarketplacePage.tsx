@@ -32,7 +32,7 @@ export const MarketplacePage = () => {
       ) : (
         <>
           {error && <p className={global_styles.error}>{error}</p>}
-          <CardList cards={cards} onBuyCard={handleBuyCard} />
+          <CardList cards={cards} onAction={handleBuyCard} />
         </>
       )}
     </div>

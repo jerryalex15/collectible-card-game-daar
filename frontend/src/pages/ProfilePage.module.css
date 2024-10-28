@@ -1,40 +1,48 @@
+/* styles.module.css */
+
 @import url("../styles.module.css");
 
-
 .profilePage {
-    padding: 20px;
-  }
-  
-  .cardGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Ajustez la taille selon vos besoins */
-    gap: 20px; /* Espace entre les cartes */
-  }
-  
-  .card {
-    border: 1px solid #ddd; /* Bordure pour les cartes */
-    border-radius: 8px; /* Coins arrondis */
-    padding: 10px;
-    text-align: center; /* Centrer le texte et les images */
-    background-color: #fff; /* Fond blanc */
-  }
-  
-  .card img {
-    width: 100%; /* Image remplissant la carte */
-    height: auto; /* Conserver le ratio d'aspect */
-    border-radius: 4px; /* Coins arrondis pour l'image */
-  }
-  
-  .card button {
-    margin-top: 10px; /* Espacement au-dessus du bouton */
-    padding: 8px 16px; /* Espacement du bouton */
-    background-color: #FFCB03; /* Couleur de fond du bouton */
-    color: white; /* Couleur du texte */
-    border: none; /* Pas de bordure */
-    border-radius: 4px; /* Coins arrondis */
-    cursor: pointer; /* Pointeur pour indiquer que c'est cliquable */
-  }
-  
-  .card button:hover {
-    background-color: #3A4CCA; /* Couleur du bouton au survol */
-  }
+  padding: 20px;
+}
+
+.cardGridContainer {
+  display: flex; /* Utilisation de Flexbox pour centrer */
+  justify-content: center; /* Centre le contenu horizontalement */
+  align-items: center; /* Centre le contenu verticalement (optionnel) */
+  flex-direction: column; /* Dispose le contenu en colonne */
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Ajustez la taille selon vos besoins */
+  gap: 20px; /* Espace entre les cartes */
+}
+
+.card {
+  border: 1px solid #ddd; /* Bordure pour les cartes */
+  border-radius: 8px; /* Coins arrondis */
+  padding: 10px;
+  text-align: center; /* Centrer le texte et les images */
+  background-color: #fff; /* Fond blanc */
+}
+
+.card img {
+  width: 100%; /* Image remplissant la carte */
+  height: auto; /* Conserver le ratio d'aspect */
+  border-radius: 4px; /* Coins arrondis pour l'image */
+}
+
+.card button {
+  margin-top: 10px; /* Espacement au-dessus du bouton */
+  padding: 8px 16px; /* Espacement du bouton */
+  background-color: #FFCB03; /* Couleur de fond du bouton */
+  color: white; /* Couleur du texte */
+  border: none; /* Pas de bordure */
+  border-radius: 4px; /* Coins arrondis */
+  cursor: pointer; /* Pointeur pour indiquer que c'est cliquable */
+}
+
+.card button:hover {
+  background-color: #3A4CCA; /* Couleur du bouton au survol */
+}
